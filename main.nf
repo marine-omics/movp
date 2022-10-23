@@ -6,7 +6,7 @@ params.outdir='test'
 
 process fastqc {
 
-    container = 'marineomics/movp'
+ //   container = 'marineomics/movp'
  // container 'https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0'
 //  container 'quay.io/biocontainers/fastqc:0.11.9--0'
 //  container 'file:///fast/sw/containers/fastqc-0.11.9.sif'
@@ -26,7 +26,7 @@ process fastqc {
 
 process multiqc {
 
-  container = 'marineomics/movp'
+ // container = 'marineomics/movp'
 
   publishDir "$params.outdir/multiqc"
   input:
