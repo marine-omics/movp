@@ -25,5 +25,5 @@ docker save marineomics/movp -o movp.tar
 Copy to a system with singularity installed and then run
 
 ```bash
-
+singularity build movp.sif docker-archive://movp.tar
 ```
