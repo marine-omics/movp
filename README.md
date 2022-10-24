@@ -10,6 +10,21 @@
 ```
 3. Create the sample csv file
 
+Example (single end reads)
+```
+sample,fastq
+1,sample1.fastq.gz
+2,sample2.fastq.gz
+```
+
+Example (paired-end reads)
+```
+sample,fastq
+1,sample1_r1.fastq.gz,sample1_r2.fastq.gz
+2,sample2_r1.fastq.gz,sample2_r2.fastq.gz
+```
+
+Paths should either be given as absolute paths or relative to the launch directory (where you invoked the nextflow command)
 
 # Docker and Singularity
 

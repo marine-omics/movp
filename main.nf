@@ -1,8 +1,5 @@
 nextflow.enable.dsl=2
 
-params.genome='../gatk/GCA_003918875.1_ASM391887v1_genomic.fna'
-params.samples='samples.csv'
-params.outdir='test'
 
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc } from './modules/multiqc.nf'
@@ -29,10 +26,18 @@ workflow {
     FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+def resolve_path(pathstring){
+  if(pathstring =~ /^\//){
+    pathstring
+  } else {
+    "${launchDir}/${pathstring}"
+  }
+}
+
 // Function to extract information (meta data + file(s)) from csv file(s)
 def extract_csv(csv_file) {
     Channel.from(csv_file).splitCsv(header: true)
-    .map{ row -> row.fastq }
+    .map{ row -> resolve_path(row.fastq) }
 //    .view{ row -> row.fastq_1 }
 //    .view { row }
 }

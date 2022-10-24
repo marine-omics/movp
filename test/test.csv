@@ -1,3 +1,3 @@
 sample,fastq
-1,CDBE3ANXX,test/data/tiny1.fastq.gz
-2,CDBE3ANXX,test/data/tiny2.fastq.gz
+1,movp/test/data/tiny1.fastq.gz
+2,movp/test/data/tiny2.fastq.gz
