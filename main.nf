@@ -1,6 +1,8 @@
 nextflow.enable.dsl=2
 
 
+params.base_path="${launchDir}"
+
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc } from './modules/multiqc.nf'
 
@@ -30,7 +32,7 @@ def resolve_path(pathstring){
   if(pathstring =~ /^\//){
     pathstring
   } else {
-    "${launchDir}/${pathstring}"
+    "${params.base_path}/${pathstring}"
   }
 }
 
