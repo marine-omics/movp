@@ -3,8 +3,13 @@
 
 # Quick Start
 
-1. Download a genome
-2. Create the sample csv file
+1. Install [nextflow](https://www.nextflow.io/)
+2. Run a quick test to make sure everything is installed properly
+```bash
+
+```
+3. Create the sample csv file
+
 
 # Docker and Singularity
 

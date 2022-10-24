@@ -4,20 +4,7 @@ params.genome='../gatk/GCA_003918875.1_ASM391887v1_genomic.fna'
 params.samples='samples.csv'
 params.outdir='test'
 
-process fastqc {
-
-  input:
-    path x
-
-  output:
-    path "*.zip"
-
-
-  script:
-  """
-  fastqc $x
-  """
-}
+include { fastqc } from './modules/fastqc.nf'
 
 process multiqc {
 
