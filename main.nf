@@ -5,23 +5,13 @@ params.samples='samples.csv'
 params.outdir='test'
 
 include { fastqc } from './modules/fastqc.nf'
+include { multiqc } from './modules/multiqc.nf'
 
-process multiqc {
 
-  publishDir "$params.outdir/multiqc"
-
-  input:
-    path '*.zip', stageAs: "?/*"
-
-  output:
-    path "*multiqc_report.html", emit: report
-
-  script:
-  """
-  multiqc  .
-  """
+workflow test {
+  ch_input_sample = extract_csv(file(params.samples, checkIfExists: true))
+  ch_input_sample | fastqc 
 }
-
 
 workflow {
   ch_input_sample = extract_csv(file(params.samples, checkIfExists: true))
