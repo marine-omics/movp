@@ -1,23 +1,28 @@
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 
-RUN apt-get update \
-	&& apt-get install -y build-essential unzip wget default-jre \
-	python3-pip
+RUN apt-get update
+RUN apt-get install -y build-essential unzip wget 
+RUN apt-get install -y --no-install-recommends openjdk-11-jre
+RUN apt-get install -y time locales 
+RUN apt-get install -y make python3-pip \
+  python3-dev \
+  cpanminus \
+  && rm -rf /var/lib/apt/lists/*
 
-# FASTQC
-ENV DST=/tmp
-ENV URL=http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-ENV ZIP=fastqc_v0.11.5.zip
 
-RUN wget $URL/$ZIP -O $DST/$ZIP && \
-  unzip - $DST/$ZIP -d $DST && \
-  rm $DST/$ZIP && \
-  cd $DST/FastQC && \
+WORKDIR /usr/local/
+
+RUN wget 'http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip' && \
+  unzip fastqc_v0.11.5.zip && \
+  rm fastqc_v0.11.5.zip && \
+  cd FastQC && \
   chmod 755 fastqc && \
-  ln -s $DST/FastQC/fastqc /usr/local/bin/fastqc
+  ln -s /usr/local/FastQC/fastqc /usr/local/bin/fastqc
 
 RUN pip install multiqc
 
-ENV PATH /usr/local/bin:$PATH
+ENV LC_ALL C
+ENV PATH=/usr/local/bin:$PATH
+
 
