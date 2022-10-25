@@ -1,7 +1,8 @@
 process fastqc {
 
   input:
-    path x
+    tuple val(meta), path(reads)
+//    path x
 
   output:
     path "*.zip"
@@ -9,6 +10,6 @@ process fastqc {
 
   script:
   """
-  fastqc $x
+  fastqc $reads
   """
 }
