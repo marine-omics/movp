@@ -3,7 +3,7 @@
 Designed to process data from raw reads through to vcf. 
 
 ```mermaid
-graph movp;
+graph TD;
 	fastq-->fastqc;
 	fastqc-->multiqc;
 	fastq-->bwa_mem;
