@@ -5,14 +5,27 @@ params.base_path="${launchDir}"
 
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc } from './modules/multiqc.nf'
-
+include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict } from './modules/gatk.nf'
+include { bwa_index } from './modules/bwa.nf'
 
 workflow {
+// Prepare genome
+  genome_fasta = Channel.fromPath(file(params.genome, checkIfExists:true))
+  genome_index = bwa_index(genome_fasta)
+  genome_dict = gatk4_createsequencedict(genome_fasta)
+
+// Preprocess data
   ch_input_sample = extract_csv(file(params.samples, checkIfExists: true))
 
-  ch_input_sample | view
-
   ch_input_sample | fastqc | collect | multiqc
+
+  ch_marked_bams = ch_input_sample | fastq2ubam | markadapters
+
+// Map with bwa
+  mapped_bams = bwa_mem_gatk(ch_marked_bams,genome_fasta,genome_index, genome_dict) 
+
+  mapped_bams.view()
+
 }
 
 
@@ -22,6 +35,32 @@ workflow {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// Parse first line of a FASTQ file, return the flowcell id and lane number.
+def flowcellLaneFromFastq(path) {
+    // expected format:
+    // xx:yy:FLOWCELLID:LANE:... (seven fields)
+    // or
+    // FLOWCELLID:LANE:xx:... (five fields)
+    def line
+    path.withInputStream {
+        InputStream gzipStream = new java.util.zip.GZIPInputStream(it)
+        Reader decoder = new InputStreamReader(gzipStream, 'ASCII')
+        BufferedReader buffered = new BufferedReader(decoder)
+        line = buffered.readLine()
+    }
+    assert line.startsWith('@')
+    line = line.substring(1)
+    def fields = line.split(':')
+    String fcid
+
+    if (fields.size() >= 7) {
+        // CASAVA 1.8+ format, from  https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm
+        // "@<instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos>:<UMI> <read>:<is filtered>:<control number>:<index>"
+        return [flowcell:fields[2],lane:fields[3]]
+    } else if (fields.size() == 5) {
+        return [flowcell:fields[0],lane:fields[1]]
+    }
+}
 
 def resolve_path(pathstring){
   if(pathstring =~ /^\//){
@@ -39,6 +78,10 @@ def extract_csv(csv_file) {
 
       def fastq_1     = file(resolve_path(row.fastq_1), checkIfExists: true)
       def fastq_2     = row.fastq_2 ? file(resolve_path(row.fastq_2), checkIfExists: true) : null
+
+      def fclane = flowcellLaneFromFastq(fastq_1)
+      meta.flowcell = fclane.flowcell
+      meta.lane = fclane.lane  
 
       reads = [fastq_1,fastq_2]
       reads.removeAll([null])

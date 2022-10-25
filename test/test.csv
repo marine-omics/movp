@@ -1,3 +1,9 @@
 sample,fastq_1
-1,test/data/tiny1.fastq.gz
-2,test/data/tiny2.fastq.gz
+1142212,test/data/1142212.fq.gz
+1142213,test/data/1142213.fq.gz
+1142226,test/data/1142226.fq.gz
+1142261,test/data/1142261.fq.gz
+1142264,test/data/1142264.fq.gz
+1142336,test/data/1142336.fq.gz
+1142349,test/data/1142349.fq.gz
+1151881,test/data/1151881.fq.gz
