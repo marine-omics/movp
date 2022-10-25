@@ -4,11 +4,11 @@ Designed to process data from raw reads through to vcf.
 
 ```mermaid
 graph movp;
-	fastq --> fastqc;
-	fastqc --> multiqc;
-	fastq --> bwa_mem;
-	genome --> bwa_index;
-	bwa_index --> bwa_mem;
+	fastq-->fastqc;
+	fastqc-->multiqc;
+	fastq-->bwa_mem;
+	genome-->bwa_index;
+	bwa_index-->bwa_mem;
 ```
 
 # Quick Start
