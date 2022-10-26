@@ -99,3 +99,26 @@ process bwa_mem_gatk {
     -PRIMARY_ALIGNMENT_STRATEGY MostDistant -ATTRIBUTES_TO_RETAIN XS 
     """
 }
+
+
+process gatk_mark_duplicates {
+
+  input:
+    path(bam)
+
+  output:
+    path "*.bam", emit: mbam
+
+
+  script:
+
+  def outfile = "${bam.baseName}_mapped_marked.bam"
+
+  """
+    gatk MarkDuplicates \
+      -I $bam -O $outfile \
+      -METRICS_FILE ${bam.baseName}_markduplicates_txt
+  """
+}
+
+

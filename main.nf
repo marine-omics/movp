@@ -5,13 +5,16 @@ params.base_path="${launchDir}"
 
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc } from './modules/multiqc.nf'
-include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict } from './modules/gatk.nf'
+include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk_mark_duplicates } from './modules/gatk.nf'
 include { bwa_index } from './modules/bwa.nf'
+include { sidx; faidx } from './modules/samtools.nf'
+include { freebayes } from './modules/freebayes.nf'
 
 workflow {
 // Prepare genome
   genome_fasta = Channel.fromPath(file(params.genome, checkIfExists:true))
   genome_index = bwa_index(genome_fasta)
+  genome_fai = faidx(genome_fasta)
   genome_dict = gatk4_createsequencedict(genome_fasta)
 
 // Preprocess data
@@ -22,9 +25,15 @@ workflow {
   ch_marked_bams = ch_input_sample | fastq2ubam | markadapters
 
 // Map with bwa
-  mapped_bams = bwa_mem_gatk(ch_marked_bams,genome_fasta,genome_index, genome_dict) 
+  mapped_bams = bwa_mem_gatk(ch_marked_bams,genome_fasta,genome_index, genome_dict)
 
-  mapped_bams.view()
+  mapped_marked_bams = gatk_mark_duplicates(mapped_bams)
+
+
+// Freebayes
+  ch_bamcollection = mapped_marked_bams | collect 
+  ch_baicollection = mapped_marked_bams | sidx | collect
+  freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai)
 
 }
 
