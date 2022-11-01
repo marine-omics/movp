@@ -3,35 +3,35 @@ process fastp {
     publishDir "$params.outdir/fastp"
 
     input:
-    tuple val(meta), path(reads)
+        tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path('*.fastp.fastq.gz') , emit: reads
-    tuple val(meta), path('*.json')           , emit: json
-    tuple val(meta), path('*.html')           , emit: html
-    tuple val(meta), path('*.log')            , emit: log
+        tuple val(meta), path('*.fastp.fastq.gz') , emit: reads
+        tuple val(meta), path('*.json')           , emit: json
+        tuple val(meta), path('*.html')           , emit: html
+        tuple val(meta), path('*.log')            , emit: log
 
     script:
 
-    def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
-    def prefix = read_group
+        def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
+        def prefix = read_group
 
-    if (meta.single_end) {
-        """
-        cat $reads \\
-        | fastp \\
+        if (meta.single_end) {
+            """
+            cat $reads \\
+            | fastp \\
             --stdin \\
             --stdout \\
-            --in1 ${reads} \\
-            --thread ${task}.cpus \\
+            --in1 ${reads[0]} \\
+            --thread $task.cpus \\
             --json ${prefix}.fastp.json \\
             --html ${prefix}.fastp.html \\
             2> ${prefix}.fastp.log \\
-        | gzip -c > ${prefix}.fastp.fastq.gz
-        """
-    } else {
-        """
-        fastp \\
+            | gzip -c > ${prefix}.fastp.fastq.gz
+            """
+            } else {
+            """
+            fastp \\
             --in1 ${reads[0]} \\
             --in2 ${reads[1]} \\
             --out1 ${prefix}_1.fastp.fastq.gz \\
@@ -41,6 +41,7 @@ process fastp {
             --thread $task.cpus \\
             --detect_adapter_for_pe \\
             2> ${prefix}.fastp.log
-        """
-    }
+            """
+        }
 }
+

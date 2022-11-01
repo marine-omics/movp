@@ -1,8 +1,5 @@
 nextflow.enable.dsl=2
 
-// Overridden in nextflow.config for test profiles
-params.base_path="${launchDir}"
-
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc } from './modules/multiqc.nf'
 include { fastp } from './modules/fastp.nf'
@@ -10,6 +7,42 @@ include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx } from './modules/samtools.nf'
 include { freebayes } from './modules/freebayes.nf'
+
+
+workflow qc {
+  take:
+    fastqin
+  main:
+    fastqin | fastqc | collect | multiqc
+}
+
+workflow preprocess {
+  take:
+    fastqin
+
+  main:
+    fastp(fastqin)
+
+  emit:
+    fastp.out.reads
+}
+
+
+workflow gatk_map {
+  take:
+    preads
+    genome_fasta
+    genome_index
+    genome_dict
+
+  main:
+    ch_marked_bams = preads | fastq2ubam | markadapters
+    mapped_bams = bwa_mem_gatk(ch_marked_bams,genome_fasta,genome_index, genome_dict)
+    mapped_marked_bams = gatk_mark_duplicates(mapped_bams)
+
+  emit:
+    mapped_marked_bams
+}
 
 workflow {
 // Prepare genome
@@ -21,18 +54,26 @@ workflow {
 // Preprocess data
   ch_input_sample = extract_csv(file(params.samples, checkIfExists: true))
 
-  ch_input_sample | fastqc | collect | multiqc
+  ch_input_sample | qc
+
+  ch_prep_reads = ch_input_sample | preprocess
+
+  mapped_marked_bams = gatk_map(ch_prep_reads,genome_fasta,genome_index, genome_dict)
 
 //  ch_marked_bams = make_gatk_bams(ch_input_sample)
 
-  fastp(ch_input_sample)
+//  ch_input_sample | fastp
 
-  ch_marked_bams = fastp.out.reads | fastq2ubam | markadapters
+//  fastp(ch_input_sample)
+
+//  ch_marked_bams = fastp.out.reads
+
+  // | fastq2ubam | markadapters
 
 // Map with bwa
-  mapped_bams = bwa_mem_gatk(ch_marked_bams,genome_fasta,genome_index, genome_dict)
+//  mapped_bams = bwa_mem_gatk(ch_marked_bams,genome_fasta,genome_index, genome_dict)
 
-  mapped_marked_bams = gatk_mark_duplicates(mapped_bams)
+//  
 
 
 // Freebayes
