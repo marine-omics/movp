@@ -23,7 +23,7 @@ workflow {
 
   ch_input_sample | fastqc | collect | multiqc
 
-  ch_marked_bams = make_gatk_bams(ch_input_sample)
+//  ch_marked_bams = make_gatk_bams(ch_input_sample)
 
   fastp(ch_input_sample)
 
