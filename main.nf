@@ -5,6 +5,7 @@ params.base_path="${launchDir}"
 
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc } from './modules/multiqc.nf'
+include { fastp } from './modules/fastp.nf'
 include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk_mark_duplicates } from './modules/gatk.nf'
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx } from './modules/samtools.nf'
@@ -22,7 +23,11 @@ workflow {
 
   ch_input_sample | fastqc | collect | multiqc
 
-  ch_marked_bams = ch_input_sample | fastq2ubam | markadapters
+  ch_marked_bams = make_gatk_bams(ch_input_sample)
+
+  fastp(ch_input_sample)
+
+  ch_marked_bams = fastp.out.reads | fastq2ubam | markadapters
 
 // Map with bwa
   mapped_bams = bwa_mem_gatk(ch_marked_bams,genome_fasta,genome_index, genome_dict)
@@ -87,6 +92,7 @@ def extract_csv(csv_file) {
 
       def fastq_1     = file(resolve_path(row.fastq_1), checkIfExists: true)
       def fastq_2     = row.fastq_2 ? file(resolve_path(row.fastq_2), checkIfExists: true) : null
+      meta.single_end = row.fastq_2 ? false : true
 
       def fclane = flowcellLaneFromFastq(fastq_1)
       meta.flowcell = fclane.flowcell

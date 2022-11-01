@@ -48,7 +48,7 @@ ENV PATH=/usr/local/gatk-4.3.0.0/:${PATH}
 
 
 #Freebayes
-
+RUN apt-get update
 RUN apt-get install -y bc 
 RUN apt-get install -y parallel meson 
 RUN apt-get install -y ninja-build 
@@ -62,6 +62,12 @@ RUN wget 'https://github.com/freebayes/freebayes/releases/download/v1.3.6/freeba
 
 ENV PATH=/usr/local/freebayes/build/:/usr/local/freebayes/scripts/:${PATH}
 
+
+# Fastp
+WORKDIR /usr/local/bin/
+RUN wget http://opengene.org/fastp/fastp.0.23.1 && \
+    mv fastp.0.23.1 fastp &&\
+    chmod a+x ./fastp
 
 # Cleanup apt package lists to save space
 RUN rm -rf /var/lib/apt/lists/*

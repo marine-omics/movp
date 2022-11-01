@@ -87,7 +87,7 @@ process bwa_mem_gatk {
     -FASTQ /dev/stdout \
     -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 -INTERLEAVE true -NON_PF true \
     |  \
-    bwa mem -M -t 2 -p $genome /dev/stdin \
+    bwa mem -M -t $task.cpus -p $genome /dev/stdin \
     | \
     gatk MergeBamAlignment \
     -ALIGNED_BAM /dev/stdin \
