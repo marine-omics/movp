@@ -49,9 +49,7 @@ nextflow run marine-omics/movp -profile singularity,zodiac -r main --genome <gen
 
 # Installing Nextflow on a system with an old java version.
 
-Our JCU HPC systems are still running java 8 but nextflow requires 11 or newer. One way around this is to use
-
-First install [sdkman](https://sdkman.io/) by following instructions [here](https://sdkman.io/install)
+Our JCU HPC systems are still running java 8 but nextflow requires 11 or newer. One way around this is to use [sdkman](https://sdkman.io/) to install and manage a different java version. First install sdkman by following instructions [here](https://sdkman.io/install)
 
 Then install java 11 with
 ```bash
@@ -96,11 +94,12 @@ process {
 ```
 Save this into a file called `local.config` and then run tell nextflow to use it with the `-c` option as follows
 
-When running on the JCU HPC jobs will be submitted to the queuing system, which is PBS Pro. Options available to set are described [here](https://www.nextflow.io/docs/latest/executor.html#pbs-pro). 
-
 ```bash
 nextflow run marine-omics/movp -latest -profile singularity,zodiac -r main <genomefile> --samples <samples.csv> --outdir myoutputs -c local.config
 ```
+
+When running on the JCU HPC jobs will be submitted to the queuing system, which is PBS Pro. Options available to set are described [here](https://www.nextflow.io/docs/latest/executor.html#pbs-pro). 
+
 
 ### Running in the background
 
