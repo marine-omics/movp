@@ -8,7 +8,8 @@ Designed to process data from raw reads through to vcf.
 graph TD;
 	fastq-->fastqc;
 	fastqc-->multiqc;
-	fastq-->bwa_mem;
+	fastq-->fastp;
+	fastp-->bwa_mem;
 	genome-->bwa_index;
 	bwa_index-->bwa_mem;
 	bwa_mem-->gatk_mark_duplicates;
@@ -43,6 +44,23 @@ If you need to customise further you can create your own `custom.config` file an
 
 5. Run the workflow with your genome and samples file
 ```bash
-nextflow run marine-omics/movp -profile singularity,test -r main --genome <genomefile> --samples <samples.csv>
+nextflow run marine-omics/movp -profile singularity -r main --genome <genomefile> --samples <samples.csv>
 ```
+
+# Troubleshooting
+
+When running for the first time nextflow will need to download the docker image from dockerhub and convert it to a singularity image. This can be slow, and nextflow doesn't make it easy to monitor progress.  If this step is failing you can try downloading the image separately yourself. 
+
+First make sure you set your `NXF_SINGULARITY_CACHEDIR` variable to a path where you can permanently store the singularity images required by `movp`. For example to put it `.nxf/singularity_cache` in your home directory you would do;
+```bash
+mkdir ~/.nxf/singularity_cache
+export NXF_SINGULARITY_CACHEDIR=${HOME}/.nxf/singularity_cache
+```
+This will create the directory and set the value of `NXF_SINGULARITY_CACHEDIR` for your current login session. To make this setting permanent you should add the export command shown above to your `.bash_profile` 
+
+Next pull the image from dockerhub. This command will download the image, convert to singularity format and place it in your previously defined `NXF_SINGULARITY_CACHEDIR`.  Note that this command is specific for container version `0.3`. 
+```bash
+singularity pull  --name ${NXF_SINGULARITY_CACHEDIR}/iracooke-movp-0.3.img docker://iracooke/movp:0.3
+```
+
 
