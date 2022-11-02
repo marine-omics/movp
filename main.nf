@@ -1,7 +1,7 @@
 nextflow.enable.dsl=2
 
 include { fastqc } from './modules/fastqc.nf'
-include { multiqc } from './modules/multiqc.nf'
+include { multiqc_fastqc; multiqc_fastp } from './modules/multiqc.nf'
 include { fastp } from './modules/fastp.nf'
 include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk_mark_duplicates } from './modules/gatk.nf'
 include { bwa_index } from './modules/bwa.nf'
@@ -13,7 +13,7 @@ workflow qc {
   take:
     fastqin
   main:
-    fastqin | fastqc | collect | multiqc
+    fastqin | fastqc | collect | multiqc_fastqc
 }
 
 workflow preprocess {
@@ -21,7 +21,8 @@ workflow preprocess {
     fastqin
 
   main:
-    fastp(fastqin)
+    fastp(fastqin) 
+    fastp.out.json | collect | multiqc_fastp
 
   emit:
     fastp.out.reads
@@ -59,22 +60,6 @@ workflow {
   ch_prep_reads = ch_input_sample | preprocess
 
   mapped_marked_bams = gatk_map(ch_prep_reads,genome_fasta,genome_index, genome_dict)
-
-//  ch_marked_bams = make_gatk_bams(ch_input_sample)
-
-//  ch_input_sample | fastp
-
-//  fastp(ch_input_sample)
-
-//  ch_marked_bams = fastp.out.reads
-
-  // | fastq2ubam | markadapters
-
-// Map with bwa
-//  mapped_bams = bwa_mem_gatk(ch_marked_bams,genome_fasta,genome_index, genome_dict)
-
-//  
-
 
 // Freebayes
   ch_bamcollection = mapped_marked_bams | collect 

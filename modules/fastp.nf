@@ -7,14 +7,15 @@ process fastp {
 
     output:
         tuple val(meta), path('*.fastp.fastq.gz') , emit: reads
-        tuple val(meta), path('*.json')           , emit: json
-        tuple val(meta), path('*.html')           , emit: html
-        tuple val(meta), path('*.log')            , emit: log
+        path('*.json')           , emit: json
+        path('*.html')           , emit: html
+        path('*.log')            , emit: log
 
     script:
 
         def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
         def prefix = read_group
+        def args = task.ext.args ?: ''
 
         if (meta.single_end) {
             """
@@ -26,6 +27,7 @@ process fastp {
             --thread $task.cpus \\
             --json ${prefix}.fastp.json \\
             --html ${prefix}.fastp.html \\
+            $args \\
             2> ${prefix}.fastp.log \\
             | gzip -c > ${prefix}.fastp.fastq.gz
             """
@@ -39,7 +41,7 @@ process fastp {
             --json ${prefix}.fastp.json \\
             --html ${prefix}.fastp.html \\
             --thread $task.cpus \\
-            --detect_adapter_for_pe \\
+            $args \\
             2> ${prefix}.fastp.log
             """
         }
