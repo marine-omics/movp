@@ -47,6 +47,17 @@ If you need to customise further you can create your own `custom.config` file an
 nextflow run marine-omics/movp -profile singularity -r main --genome <genomefile> --samples <samples.csv>
 ```
 
+# Installing Nextflow on a system with an old java version.
+
+Our JCU HPC systems are still running java 8 but nextflow requires 11 or newer. One way around this is to use
+
+First install [sdkman](https://sdkman.io/) by following instructions [here](https://sdkman.io/install)
+
+Then install java 11 with
+```bash
+sdk install java 11.0.2-open
+```
+
 # Troubleshooting
 
 When running for the first time nextflow will need to download the docker image from dockerhub and convert it to a singularity image. This can be slow, and nextflow doesn't make it easy to monitor progress.  If this step is failing you can try downloading the image separately yourself. 
