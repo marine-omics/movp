@@ -24,19 +24,31 @@ process fastq2ubam {
 
     script:
 
-    def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
-
-    """
-    gatk FastqToSam \\
-    -FASTQ ${reads[0]} \\
-    -FASTQ2 ${reads[1]} \\
-      -OUTPUT ${read_group}.bam \\
-      -READ_GROUP_NAME ${read_group} \\
-      -SAMPLE_NAME ${meta.sample} \\
-      -LIBRARY_NAME ${meta.sample} \\
-      -PLATFORM_UNIT ${read_group} \\
-      -PLATFORM ILLUMINA
-    """
+      def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
+      if (meta.single_end) {
+        """
+        gatk FastqToSam \\
+        -FASTQ ${reads[0]} \\
+          -OUTPUT ${read_group}.bam \\
+          -READ_GROUP_NAME ${read_group} \\
+          -SAMPLE_NAME ${meta.sample} \\
+          -LIBRARY_NAME ${meta.sample} \\
+          -PLATFORM_UNIT ${read_group} \\
+          -PLATFORM ILLUMINA
+        """
+        } else {
+        """
+        gatk FastqToSam \\
+        -FASTQ ${reads[0]} \\
+        -FASTQ2 ${reads[1]} \\
+          -OUTPUT ${read_group}.bam \\
+          -READ_GROUP_NAME ${read_group} \\
+          -SAMPLE_NAME ${meta.sample} \\
+          -LIBRARY_NAME ${meta.sample} \\
+          -PLATFORM_UNIT ${read_group} \\
+          -PLATFORM ILLUMINA
+        """
+        }
 }
 
 
@@ -47,7 +59,7 @@ process markadapters {
       path(ubam)
 
     output:
-      path "*.bam", emit: mdbam
+      path "*marked.bam", emit: mdbam
 
     script:
 
@@ -112,7 +124,7 @@ process gatk_mark_duplicates {
 
   script:
 
-  def outfile = "${bam.baseName}_mapped_marked.bam"
+  def outfile = "${bam.baseName}_marked.bam"
 
   """
     gatk MarkDuplicates \
