@@ -96,9 +96,16 @@ process {
 ```
 Save this into a file called `local.config` and then run tell nextflow to use it with the `-c` option as follows
 
+When running on the JCU HPC jobs will be submitted to the queuing system, which is PBS Pro. Options available to set are described [here](https://www.nextflow.io/docs/latest/executor.html#pbs-pro). 
+
 ```bash
 nextflow run marine-omics/movp -latest -profile singularity,zodiac -r main <genomefile> --samples <samples.csv> --outdir myoutputs -c local.config
 ```
 
+### Running in the background
 
+If your workflow will take a long time you may want to run it in the background. This will ensure that the workflow continues even if you logout.  To do this simply add the `-bg` option. Once the workflow is running in the background you can check progress using
+```bash
+
+```
 
