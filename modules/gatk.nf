@@ -87,7 +87,7 @@ process bwa_mem_gatk {
     path(dict)
 
     output:
-    path "*.bam", emit: bam
+    path "*mapped.bam", emit: bam
 
     script:
 

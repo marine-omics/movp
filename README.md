@@ -44,7 +44,7 @@ If you need to customise further you can create your own `custom.config` file an
 
 5. Run the workflow with your genome and samples file
 ```bash
-nextflow run marine-omics/movp -profile singularity -r main --genome <genomefile> --samples <samples.csv>
+nextflow run marine-omics/movp -profile singularity,zodiac -r main --genome <genomefile> --samples <samples.csv> --outdir myoutputs
 ```
 
 # Installing Nextflow on a system with an old java version.
@@ -60,6 +60,8 @@ sdk install java 11.0.2-open
 
 # Troubleshooting
 
+### Docker image
+
 When running for the first time nextflow will need to download the docker image from dockerhub and convert it to a singularity image. This can be slow, and nextflow doesn't make it easy to monitor progress.  If this step is failing you can try downloading the image separately yourself. 
 
 First make sure you set your `NXF_SINGULARITY_CACHEDIR` variable to a path where you can permanently store the singularity images required by `movp`. For example to put it `.nxf/singularity_cache` in your home directory you would do;
@@ -73,5 +75,30 @@ Next pull the image from dockerhub. This command will download the image, conver
 ```bash
 singularity pull  --name ${NXF_SINGULARITY_CACHEDIR}/iracooke-movp-0.3.img docker://iracooke/movp:0.3
 ```
+
+### Customising resource usage
+
+The default resource limits for individual processes are often going to need tweaking for individidual projects. This can be done fairly easily by creating a custom config file. 
+
+
+For example, if you want to increase memory and cpu requests for the `bwa_mem_gatk` and `gatk_mark_duplicates` steps you would create a custom config as follows
+```
+process {
+	withName: 'bwa_mem_gatk'{
+		cpus=12
+		memory=10.GB
+	}
+	withName: 'gatk_mark_duplicates'{
+		cpus=12
+		memory=30.GB
+	}
+}
+```
+Save this into a file called `local.config` and then run tell nextflow to use it with the `-c` option as follows
+
+```bash
+nextflow run marine-omics/movp -latest -profile singularity,zodiac -r main <genomefile> --samples <samples.csv> --outdir myoutputs -c local.config
+```
+
 
 
