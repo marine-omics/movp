@@ -64,7 +64,7 @@ workflow {
 // Freebayes
   ch_bamcollection = mapped_marked_bams | collect 
   ch_baicollection = mapped_marked_bams | sidx | collect
-  freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai)
+  freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai,file(params.populations))
 
 }
 

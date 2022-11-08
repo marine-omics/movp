@@ -7,6 +7,7 @@ process freebayes {
     path(bai)
     path fasta
     path fasta_fai
+    path populations
 
     output:
     path("*.vcf.gz"), emit: vcf
@@ -14,6 +15,9 @@ process freebayes {
     script:
     def prefix="freebayes"
     def chunksize= 10000
+    def populations_file = populations.name != 'NO_FILE'  ? "--populations ${populations}" : ""
+
+    def args = task.ext.args ?: ''
 
     if (task.cpus > 1) {
         """
@@ -22,7 +26,9 @@ process freebayes {
             <(fasta_generate_regions.py $fasta_fai $chunksize) $task.cpus \\
             -f $fasta \\
             -L bamlist.txt \\
-            -E -1 -m 30 -q 20 -K --strict-vcf > ${prefix}.vcf
+            $args \\
+            $populations_file \\
+            --strict-vcf > ${prefix}.vcf
 
         bgzip ${prefix}.vcf
 
@@ -34,7 +40,9 @@ process freebayes {
         freebayes \\
             -f $fasta \\
             -L bamlist.txt \\
-            -E -1 -m 30 -q 20 -K --strict-vcf > ${prefix}.vcf
+            $args \\
+            $populations_file \\
+            --strict-vcf > ${prefix}.vcf
 
         bgzip ${prefix}.vcf
 
@@ -42,3 +50,9 @@ process freebayes {
     }
 
 }
+
+
+//--populations FILE
+//                   Each line of FILE should list a sample and a population which
+//                   it is part of.  The population-based bayesian inference model
+//                   will then be partitioned on the basis of the populations.
