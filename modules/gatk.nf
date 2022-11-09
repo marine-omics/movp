@@ -59,6 +59,7 @@ process markadapters {
       path(ubam)
 
     output:
+      val(meta), emit: meta
       path "*marked.bam", emit: mdbam
 
     script:
@@ -81,12 +82,14 @@ process bwa_mem_gatk {
     publishDir "$params.outdir/mapped_bams"
 
     input:
+    val(meta)
     each path(ubam)
     path(genome)
     path(index)
     path(dict)
 
     output:
+    val(meta), emit: meta
     path "*mapped.bam", emit: bam
 
     script:
@@ -116,6 +119,7 @@ process bwa_mem_gatk {
 process gatk_mark_duplicates {
 
   input:
+    val(meta)
     path(bam)
 
   output:
