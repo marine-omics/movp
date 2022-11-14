@@ -19,8 +19,9 @@ process fastq2ubam {
       tuple val(meta), path(reads)
 
     output:
-      val(meta), emit: meta
-      path "*.bam", emit: bam
+      tuple val(meta), path("*.bam"), emit: ubam
+//      val(meta), emit: meta
+  //    path "*.bam", emit: bam
 
     script:
 
@@ -55,12 +56,14 @@ process fastq2ubam {
 process markadapters {
 
     input:
-      val(meta)
-      path(ubam)
+      tuple val(meta), path(ubam)
+//      val(meta)
+  //    path(ubam)
 
     output:
-      val(meta), emit: meta
-      path "*marked.bam", emit: mdbam
+      tuple val(meta), path("*marked.bam"), emit: mdbam
+//      val(meta), emit: meta
+  //    path "*marked.bam", emit: mdbam
 
     script:
 
@@ -82,15 +85,14 @@ process bwa_mem_gatk {
     publishDir "$params.outdir/mapped_bams"
 
     input:
-    val(meta)
-    each path(ubam)
+    tuple val(meta), path(ubam)
     path(genome)
     path(index)
     path(dict)
 
     output:
-    val(meta), emit: meta
-    path "*mapped.bam", emit: bam
+    tuple val(meta), path("*mapped.bam"), emit: bam
+//    path "*mapped.bam", emit: bam
 
     script:
 
@@ -119,11 +121,10 @@ process bwa_mem_gatk {
 process gatk_mark_duplicates {
 
   input:
-    val(meta)
-    path(bam)
+    tuple val(meta), path(bam)
 
   output:
-    path "*.bam", emit: mbam
+    tuple val(meta), path("*.bam"), emit: mbam
 
 
   script:

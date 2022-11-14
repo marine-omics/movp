@@ -1,4 +1,5 @@
 
+
 process faidx {
 
     input:
@@ -16,14 +17,66 @@ process faidx {
 process sidx {
 
     input:
-    path bam
+    tuple val(meta), path(bam)
 
     output:
-    path("*.bai")
+    tuple val(meta), path("*.bai")
 
     script:
     """
-    samtools index ${bam}
+    samtools index $bam
+    """
+}
+
+
+process flagstat {
+
+    input:
+    tuple val(meta), path(bam), path(bai)
+
+    output:
+    path ("*.flagstat"), emit: flagstat
+
+    script:
+
+    def outfile = "${meta.sample}.flagstat"
+
+    """
+    samtools flagstat $bam > $outfile
+    """
+}
+
+process stat {
+
+    input:
+    tuple val(meta), path(bam), path(bai)
+
+    output:
+    path ("*.stat"), emit: stat
+
+    script:
+
+    def outfile = "${meta.sample}.stat"
+
+    """
+    samtools stat $bam > $outfile
+    """
+}
+
+process idxstat {
+
+    input:
+    tuple val(meta), path(bam), path(bai)
+
+    output:
+    path ("*.idxstat"), emit: idxstat
+
+    script:
+
+    def outfile = "${meta.sample}.idxstat"
+
+    """
+    samtools idxstats $bam > $outfile
     """
 }
 

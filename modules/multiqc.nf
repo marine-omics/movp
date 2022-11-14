@@ -30,3 +30,23 @@ process multiqc_fastp {
   multiqc -n fastp_multiqc_report.html .
   """
 }
+
+
+
+process multiqc_bams {
+
+  publishDir "$params.outdir/multiqc"
+
+  input:
+    path '*.stat', stageAs: "?/*"
+    path '*.flagstat', stageAs: "?/*"
+    path '*.idxstat', stageAs: "?/*"
+
+  output:
+    path "bam_multiqc_report.html", emit: report
+
+  script:
+  """
+  multiqc -n bam_multiqc_report.html .
+  """
+}

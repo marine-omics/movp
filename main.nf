@@ -1,11 +1,11 @@
 nextflow.enable.dsl=2
 
 include { fastqc } from './modules/fastqc.nf'
-include { multiqc_fastqc; multiqc_fastp } from './modules/multiqc.nf'
+include { multiqc_fastqc; multiqc_fastp; multiqc_bams } from './modules/multiqc.nf'
 include { fastp } from './modules/fastp.nf'
 include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk_mark_duplicates } from './modules/gatk.nf'
 include { bwa_index } from './modules/bwa.nf'
-include { sidx; faidx } from './modules/samtools.nf'
+include { sidx; faidx; flagstat; stat; idxstat } from './modules/samtools.nf'
 include { freebayes } from './modules/freebayes.nf'
 
 
@@ -45,12 +45,23 @@ workflow gatk_map {
     mapped_marked_bams
 }
 
+workflow bam_qc {
+  take:
+    bams
+
+  main:
+    fs = bams | flagstat | collect
+    s = bams | stat | collect
+    idxf = bams | idxstat | collect
+    multiqc_bams(fs,s,idxf)
+}
+
 workflow {
 // Prepare genome
-  genome_fasta = Channel.fromPath(file(params.genome, checkIfExists:true))
-  genome_index = bwa_index(genome_fasta)
-  genome_fai = faidx(genome_fasta)
-  genome_dict = gatk4_createsequencedict(genome_fasta)
+  genome_fasta = Channel.fromPath(file(params.genome, checkIfExists:true)) | collect
+  genome_index = bwa_index(genome_fasta) | collect
+  genome_fai = faidx(genome_fasta) | collect
+  genome_dict = gatk4_createsequencedict(genome_fasta) | collect
 
 // Preprocess data
   ch_input_sample = extract_csv(file(params.samples, checkIfExists: true))
@@ -59,11 +70,17 @@ workflow {
 
   ch_prep_reads = ch_input_sample | preprocess
 
-  mapped_marked_bams = gatk_map(ch_prep_reads,genome_fasta,genome_index, genome_dict)
+  ch_mapped_marked_bams = gatk_map(ch_prep_reads,genome_fasta,genome_index, genome_dict)
+
+  ch_mapped_marked_bais = ch_mapped_marked_bams | sidx
+
+  ch_bbai_collection = ch_mapped_marked_bams.join(ch_mapped_marked_bais)
+
+  ch_bbai_collection | bam_qc
 
 // Freebayes
-  ch_bamcollection = mapped_marked_bams | collect 
-  ch_baicollection = mapped_marked_bams | sidx | collect
+  ch_bamcollection = ch_mapped_marked_bams.map{m,b -> b} | collect
+  ch_baicollection = ch_mapped_marked_bais.map{m,b -> b} | collect
   freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai,file(params.populations))
 
 }
