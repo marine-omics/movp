@@ -9,10 +9,13 @@ graph TD;
 	fastq-->fastqc;
 	fastqc-->multiqc;
 	fastq-->fastp;
+	fastp-->multiqc;
 	fastp-->bwa_mem;
 	genome-->bwa_index;
 	bwa_index-->bwa_mem;
 	bwa_mem-->gatk_mark_duplicates;
+	gatk_mark_duplicates-->samtools_stats;
+	samtools_stats-->multiqc;
 	gatk_mark_duplicates-->freebayes;
 ```
 
