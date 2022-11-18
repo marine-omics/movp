@@ -1,6 +1,6 @@
 process freebayes {
 
-    publishDir "$params.outdir/freebayes"
+    publishDir "$params.outdir/freebayes", mode: 'copy'
 
     input:
     path(bam)

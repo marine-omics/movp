@@ -1,6 +1,6 @@
 process fastp {
 
-    publishDir "$params.outdir/fastp"
+    publishDir "$params.outdir/fastp", mode: 'copy'
 
     input:
         tuple val(meta), path(reads)

@@ -1,6 +1,6 @@
 process multiqc_fastqc {
 
-  publishDir "$params.outdir/multiqc"
+  publishDir "$params.outdir/multiqc", mode: 'copy'
 
   input:
     path '*.zip', stageAs: "?/*"
@@ -17,7 +17,7 @@ process multiqc_fastqc {
 
 process multiqc_fastp {
 
-  publishDir "$params.outdir/multiqc"
+  publishDir "$params.outdir/multiqc", mode: 'copy'
 
   input:
     path '*.json', stageAs: "?/*"
@@ -35,7 +35,7 @@ process multiqc_fastp {
 
 process multiqc_bams {
 
-  publishDir "$params.outdir/multiqc"
+  publishDir "$params.outdir/multiqc", mode: 'copy'
 
   input:
     path '*.stat', stageAs: "?/*"

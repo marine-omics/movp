@@ -82,7 +82,7 @@ process markadapters {
 
 process bwa_mem_gatk {
 
-    publishDir "$params.outdir/mapped_bams"
+    publishDir "$params.outdir/mapped_bams", mode: 'copy'
 
     input:
     tuple val(meta), path(mkbam), path(ubam)

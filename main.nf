@@ -41,8 +41,6 @@ workflow gatk_map {
     ch_marked_bams =  ch_ubams | markadapters
     ch_merge_bams = ch_ubams.join(ch_marked_bams)
 
-    ch_merge_bams.view()
-
     mapped_bams = bwa_mem_gatk(ch_merge_bams,genome_fasta,genome_index, genome_dict)
     mapped_marked_bams = gatk_mark_duplicates(mapped_bams)
 
