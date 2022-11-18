@@ -85,7 +85,7 @@ process bwa_mem_gatk {
     publishDir "$params.outdir/mapped_bams"
 
     input:
-    tuple val(meta), path(ubam)
+    tuple val(meta), path(mkbam), path(ubam)
     path(genome)
     path(index)
     path(dict)
@@ -96,11 +96,11 @@ process bwa_mem_gatk {
 
     script:
 
-    def outfile = "${ubam.baseName}_mapped.bam"
+    def outfile = "${mkbam.baseName}_mapped.bam"
 
     """
     gatk SamToFastq \
-    -I $ubam \
+    -I $mkbam \
     -FASTQ /dev/stdout \
     -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 -INTERLEAVE true -NON_PF true \
     |  \
