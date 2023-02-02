@@ -7,6 +7,7 @@ include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat } from './modules/samtools.nf'
 include { freebayes } from './modules/freebayes.nf'
+include { mpileup_call; isec } from './modules/bcftools.nf'
 
 
 workflow qc {
@@ -85,6 +86,14 @@ workflow {
   ch_bamcollection = ch_mapped_marked_bams.map{m,b -> b} | collect
   ch_baicollection = ch_mapped_marked_bais.map{m,b -> b} | collect
   freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai,file(params.populations))
+
+// bcftools
+  mpileup_call(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai)  
+
+  // ch_raw_vcfs = freebayes.out.vcf.concat(mpileup_call.out.vcf) | collect
+  // ch_raw_vcfindexes = freebayes.out.vcfi.concat(mpileup_call.out.vcfi) | collect
+
+  // isec(ch_raw_vcfs,ch_raw_vcfindexes,2)
 
 }
 

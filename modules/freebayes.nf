@@ -11,6 +11,7 @@ process freebayes {
 
     output:
     path("*.vcf.gz"), emit: vcf
+    path("*.vcf.gz.tbi"), emit: vcfi
 
     script:
     def prefix="freebayes"
@@ -31,7 +32,7 @@ process freebayes {
             --strict-vcf > ${prefix}.vcf
 
         bgzip ${prefix}.vcf
-
+        tabix ${prefix}.vcf.gz
         """
 
     } else {
@@ -45,7 +46,7 @@ process freebayes {
             --strict-vcf > ${prefix}.vcf
 
         bgzip ${prefix}.vcf
-
+        tabix ${prefix}.vcf.gz
         """
     }
 

@@ -21,7 +21,7 @@ graph TD;
 
 # Quick Start
 
-1. Install [nextflow](https://www.nextflow.io/)
+1. Install [nextflow](https://www.nextflow.io/). If working on JCU infrastructure [please see these detailed instructions](https://gist.github.com/iracooke/bec2b24a86eb682f7d3055eea15e61aa)
 2. Run a test to make sure everything is installed properly. The command below should work on a linux machine with singularity installed (eg JCU HPC). 
 ```bash
 nextflow run marine-omics/movp -latest -profile singularity,test -r main
