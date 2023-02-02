@@ -7,7 +7,7 @@ include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat } from './modules/samtools.nf'
 include { freebayes } from './modules/freebayes.nf'
-include { mpileup_call; isec } from './modules/bcftools.nf'
+include { mpileup_call } from './modules/bcftools.nf'
 
 
 workflow qc {
