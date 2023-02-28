@@ -17,6 +17,7 @@ graph TD;
 	gatk_mark_duplicates-->samtools_stats;
 	samtools_stats-->multiqc;
 	gatk_mark_duplicates-->freebayes;
+	gatk_mark_duplicates-->bcftools_mpileup;
 ```
 
 # Quick Start

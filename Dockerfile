@@ -77,6 +77,24 @@ RUN wget https://github.com/samtools/htslib/releases/download/1.16/htslib-1.16.t
  make && \
  make install && rm -rf /usr/local/htslib-${HTSLIBVER}
 
+#
+# ------ Installing vcflib / vcfwave.  Installs but vcfwave seems buggy as of 24Feb 2023 ----- #
+#
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   git cmake libhts-dev libtabixpp-dev libtabixpp0 \
+#   pybind11-dev libcurl4-openssl-dev python-dev \
+#   libomp-dev
+
+# WORKDIR /usr/local/
+
+# RUN git clone --recursive https://github.com/vcflib/vcflib.git && \
+#   cd vcflib && \
+#   mkdir -p build && cd build && \
+#   cmake -DCMAKE_BUILD_TYPE=Release -DZIG=OFF .. && \
+#   cmake --build . && \
+#   cmake --install .
+
+#ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/vcflib/build/contrib/WFA2-lib/
 
 # Cleanup apt package lists to save space
 RUN rm -rf /var/lib/apt/lists/*
