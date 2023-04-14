@@ -126,6 +126,7 @@ process gatk_mark_duplicates {
   output:
     tuple val(meta), path("*.bam"), emit: mbam
 
+  def args = task.ext.args ?: ''
 
   script:
 
@@ -134,6 +135,7 @@ process gatk_mark_duplicates {
   """
     gatk MarkDuplicates \
       -I $bam -O $outfile \
+      $args \
       -METRICS_FILE ${bam.baseName}_markduplicates_txt
   """
 }
