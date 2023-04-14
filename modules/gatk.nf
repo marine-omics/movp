@@ -126,9 +126,9 @@ process gatk_mark_duplicates {
   output:
     tuple val(meta), path("*.bam"), emit: mbam
 
-  def args = task.ext.args ?: ''
-
   script:
+
+  def args = task.ext.args ?: ''
 
   def outfile = "${bam.baseName}_marked.bam"
 
