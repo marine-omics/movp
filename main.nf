@@ -6,7 +6,7 @@ include { fastp } from './modules/fastp.nf'
 include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk_mark_duplicates } from './modules/gatk.nf'
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat } from './modules/samtools.nf'
-include { freebayes } from './modules/freebayes.nf'
+include { freebayes; fasta_generate_regions; freebayes_collect } from './modules/freebayes.nf'
 include { mpileup_call } from './modules/bcftools.nf'
 
 
@@ -82,10 +82,16 @@ workflow {
 
   ch_bbai_collection | bam_qc
 
+  ch_regions = fasta_generate_regions(genome_fasta,genome_fai,params.fb_chunksize)
+  .splitText().map{it -> it.trim()}
+
+
 // Freebayes
   ch_bamcollection = ch_mapped_marked_bams.map{m,b -> b} | collect
   ch_baicollection = ch_mapped_marked_bais.map{m,b -> b} | collect
-  freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai,file(params.populations))
+  ch_chunk_vcfs = freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai,ch_regions,file(params.populations)) | collect
+
+  freebayes_collect(ch_chunk_vcfs)
 
 // bcftools
   mpileup_call(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai)  

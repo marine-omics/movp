@@ -1,4 +1,4 @@
-process freebayes {
+process freebayes_parallel {
 
     publishDir "$params.outdir/freebayes", mode: 'copy'
 
@@ -49,6 +49,83 @@ process freebayes {
         tabix ${prefix}.vcf.gz
         """
     }
+
+}
+
+
+process freebayes {
+
+    input:
+    path(bam)
+    path(bai)
+    path fasta
+    path fasta_fai
+    val region
+    path populations
+
+    output:
+    path("*.vcf"), emit: vcf
+
+    script:
+    def prefix="freebayes"
+    def populations_file = populations.name != 'NO_FILE'  ? "--populations ${populations}" : ""
+
+    def args = task.ext.args ?: ''
+
+    """
+        ls *.bam > bamlist.txt
+        freebayes --region ${region} \\
+            -f $fasta \\
+            -L bamlist.txt \\
+            $args \\
+            $populations_file \\
+            --strict-vcf > ${prefix}.${region}.vcf
+    """
+
+}
+
+process freebayes_collect {
+
+    publishDir "$params.outdir/freebayes", mode: 'copy'
+
+    input:
+    path(vcf)
+
+    output:
+    path("*.vcf.gz"), emit: vcf
+    path("*.vcf.gz.tbi"), emit: vcfi
+
+    script:
+
+    def prefix="freebayes"
+
+    """
+    cat *.vcf | vcffirstheader | vcfstreamsort -w > ${prefix}.vcf
+
+    bgzip ${prefix}.vcf
+    tabix ${prefix}.vcf.gz
+    """
+}
+
+
+process fasta_generate_regions {
+
+    input:
+    path fasta
+    path fasta_fai
+    val chunksize
+
+    output:
+    path("*.regions")
+
+    script:
+
+    def args = task.ext.args ?: ''
+
+    """
+    fasta_generate_regions.py $fasta_fai $chunksize > freebayes.regions
+    """
+
 
 }
 
