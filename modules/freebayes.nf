@@ -101,7 +101,7 @@ process freebayes_collect {
     def prefix="freebayes"
 
     """
-    sort_vcf_files.sh | xargs cat | vcffirstheader | vcfstreamsort -w 1000 > ${prefix}.vcf
+    ./sort_vcf_files.sh | xargs cat | vcffirstheader | vcfstreamsort -w 1000 > ${prefix}.vcf
 
     bgzip ${prefix}.vcf
     tabix ${prefix}.vcf.gz
