@@ -91,7 +91,7 @@ workflow {
   ch_baicollection = ch_mapped_marked_bais.map{m,b -> b} | collect
   ch_chunk_vcfs = freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai,ch_regions,file(params.populations)) | collect
 
-  freebayes_collect(ch_chunk_vcfs)
+  freebayes_collect(ch_chunk_vcfs,"${projectDir}/bash/sort_vcf_files.sh")
 
 // bcftools
   mpileup_call(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai)  

@@ -1,0 +1,1 @@
+ls *.vcf | awk -F "[:.-]" '{print $1,$2,$3,$4,$5}' | sort -k2,2 -k4,4n | awk '{printf("%s.%s.%s:%s-%s.vcf\n",$1,$2,$3,$4,$5)}' 
