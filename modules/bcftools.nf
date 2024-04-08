@@ -23,6 +23,30 @@ process mpileup_call {
 
 }
 
+
+
+process gatk_gathervcfs {
+
+    publishDir "$params.outdir/gatk", mode: 'copy'
+
+    input:
+      path(vcfs)
+
+    output:
+    path("gatk.vcf.gz"), emit: vcfz
+
+    script:
+    def args = task.ext.args ?: ''
+
+
+    """
+    bcftools concat ${vcfs} -O b -o gatk.vcf.gz
+    """
+
+}
+
+
+
 // process isec_union {
 //   publishDir "$params.outdir/vcfunion", mode: 'copy'
 

@@ -141,3 +141,91 @@ process gatk_mark_duplicates {
 }
 
 
+process gatk_haplotype_caller {
+
+    input:
+      tuple val(meta), path(bam), path(bai)
+      path(genome)
+      path(index)
+      path(dict)
+
+
+    output:
+    tuple val(meta), path("*.g.vcf.gz"), emit: gvcf
+
+    script:
+    def args = task.ext.args ?: ''
+    def outfile = "${bam.baseName}.g.vcf.gz"
+    """
+
+    gatk --java-options "-Xmx20G -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10" \
+        HaplotypeCaller \
+        --native-pair-hmm-threads $task.cpus \
+        -R $genome \
+        -I $bam \
+        -O $outfile \
+        -contamination 0 -ERC GVCF
+    """
+
+}
+
+
+process gatk_genomicsdb_import {
+
+    input:
+      val(region)
+      path(samplemap)
+
+    output:
+    tuple val(region), path("*.gatk.db"), emit: gdb
+
+    script:
+    def args = task.ext.args ?: ''
+
+    """
+    gatk --java-options "-Xmx4g -Xms4g" \
+        GenomicsDBImport \
+        --genomicsdb-workspace-path ${region}.gatk.db \
+        --sample-name-map $samplemap \
+        --reader-threads 4 \
+        --batch-size 50 \
+        --L $region
+    """
+
+}
+
+
+
+
+process gatk_genotypegvcfs {
+
+    input:
+      tuple val(region), path(gdb)
+      path(genome)
+      path(index)
+      path(dict)
+
+    output:
+    path("${region}.vcf.gz"), emit: vcfz
+
+    script:
+    def args = task.ext.args ?: ''
+
+    """
+    gatk --java-options "-Xmx8g -Xms8g" \
+        GenotypeGVCFs \
+        -R $genome \
+        -O ${region}.vcf.gz \
+        --only-output-calls-starting-in-intervals \
+        --use-new-qual-calculator \
+        -V gendb://${gdb} \
+        -L $region
+    """
+
+}
+
+
+
+
+
+

@@ -21,3 +21,16 @@ for f in $(cut -f 1 -d ' ' test_samples.txt);do
 	samtools fastq $f | gzip > ${f%_mapped.bam}.fq.gz
 done
 ```
+
+Now supplementing this with a second region
+
+```bash
+# This is to find an appropriate contig
+while read c;do cv=$(bcftools view 2785.vcf.gz -s "1142212,1142213,1142226,1142261,1142264,1142336,1142349,1151881"  -r $c | bcftools filter -i 'COUNT(GT="het")>0' | bcftools view -H | wc -l); echo $c,$cv  ;done < <(head -n 1000 contig_lengths.txt | cut -f 1)
+```
+
+```bash
+for s in 1142212 1142213 1142226 1142261 1142264 1142336 1142349 1151881;do samtools view -O BAM ../${s}_mapped.bam QXJH01002620.1 > ${s}_mapped.bam; done
+
+for f in *_mapped.bam;do samtools fastq $f | gzip > ${f%_mapped.bam}.fq.gz;done
+```

@@ -3,11 +3,11 @@ nextflow.enable.dsl=2
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc_fastqc; multiqc_fastp; multiqc_bams } from './modules/multiqc.nf'
 include { fastp } from './modules/fastp.nf'
-include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk_mark_duplicates } from './modules/gatk.nf'
+include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk_mark_duplicates; gatk_haplotype_caller; gatk_genomicsdb_import; gatk_genotypegvcfs } from './modules/gatk.nf'
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat } from './modules/samtools.nf'
 include { freebayes; fasta_generate_regions; freebayes_collect } from './modules/freebayes.nf'
-include { mpileup_call } from './modules/bcftools.nf'
+include { mpileup_call; gatk_gathervcfs } from './modules/bcftools.nf'
 
 
 workflow qc {
@@ -78,9 +78,9 @@ workflow {
 
   ch_mapped_marked_bais = ch_mapped_marked_bams | sidx
 
-  ch_bbai_collection = ch_mapped_marked_bams.join(ch_mapped_marked_bais)
+  ch_bbai = ch_mapped_marked_bams.join(ch_mapped_marked_bais)
 
-  ch_bbai_collection | bam_qc
+  ch_bbai | bam_qc
 
   ch_regions = fasta_generate_regions(genome_fasta,genome_fai,params.fb_chunksize)
   .splitText().map{it -> it.trim()}
@@ -96,11 +96,24 @@ workflow {
 // bcftools
   mpileup_call(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai)  
 
-  // ch_raw_vcfs = freebayes.out.vcf.concat(mpileup_call.out.vcf) | collect
-  // ch_raw_vcfindexes = freebayes.out.vcfi.concat(mpileup_call.out.vcfi) | collect
 
-  // isec(ch_raw_vcfs,ch_raw_vcfindexes,2)
+// gatk
+  ch_gvcfs = gatk_haplotype_caller(ch_bbai,genome_fasta,genome_fai,genome_dict)
 
+  samples_gvcfs_file = ch_gvcfs.collectFile(name: 'sample_map.txt', newLine:true){m,b -> "$m.sample\t$b" } | collect
+
+
+  ch_gatk_regions = genome_fasta
+     .splitFasta( record: [id: true, seqString: false] )
+     .map { record -> record.id[0] }
+
+
+  ch_gdb = gatk_genomicsdb_import(ch_gatk_regions,samples_gvcfs_file)
+
+
+  ch_gatk_vcfs = gatk_genotypegvcfs(ch_gdb,genome_fasta,genome_fai,genome_dict) | collect
+
+  gatk_gathervcfs(ch_gatk_vcfs)
 }
 
 
