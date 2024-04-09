@@ -156,9 +156,10 @@ process gatk_haplotype_caller {
     script:
     def args = task.ext.args ?: ''
     def outfile = "${bam.baseName}.g.vcf.gz"
+
     """
 
-    gatk --java-options "-Xmx20G -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10" \
+    gatk --java-options "-Xmx${task.memory.giga}G" \
         HaplotypeCaller \
         --native-pair-hmm-threads $task.cpus \
         -R $genome \
@@ -183,11 +184,11 @@ process gatk_genomicsdb_import {
     def args = task.ext.args ?: ''
 
     """
-    gatk --java-options "-Xmx4g -Xms4g" \
+    gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
         GenomicsDBImport \
         --genomicsdb-workspace-path ${region}.gatk.db \
         --sample-name-map $samplemap \
-        --reader-threads 4 \
+        --reader-threads ${task.cpus} \
         --batch-size 50 \
         --L $region
     """
@@ -212,7 +213,7 @@ process gatk_genotypegvcfs {
     def args = task.ext.args ?: ''
 
     """
-    gatk --java-options "-Xmx8g -Xms8g" \
+    gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
         GenotypeGVCFs \
         -R $genome \
         -O ${region}.vcf.gz \
