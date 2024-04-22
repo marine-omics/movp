@@ -121,10 +121,10 @@ process bwa_mem_gatk {
 process gatk_mark_duplicates {
 
   input:
-    tuple val(meta), path(bam)
+    tuple val(sample), path(bam)
 
   output:
-    tuple val(meta), path("*.bam"), emit: mbam
+    tuple val(sample), path("*.bam"), emit: mbam
 
   script:
 
@@ -144,14 +144,14 @@ process gatk_mark_duplicates {
 process gatk_haplotype_caller {
 
     input:
-      tuple val(meta), path(bam), path(bai)
+      tuple val(sample), path(bam), path(bai)
       path(genome)
       path(index)
       path(dict)
 
 
     output:
-    tuple val(meta), path("*.g.vcf.gz"), emit: gvcf
+    tuple val(sample), path("*.g.vcf.gz"), emit: gvcf
 
     script:
     def args = task.ext.args ?: ''

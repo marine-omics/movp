@@ -1,3 +1,4 @@
 sample,fastq_1,fastq_2
-DI-1-1,test/data/DI-1-1_R1.fq.gz,test/data/DI-1-1_R2.fq.gz
+DI-1-1,test/data/DI-1-1_1.R1.fq.gz,test/data/DI-1-1_1.R2.fq.gz
+DI-1-1,test/data/DI-1-1_2.R1.fq.gz,test/data/DI-1-1_2.R2.fq.gz
 DI-1-10,test/data/DI-1-10_R1.fq.gz,test/data/DI-1-10_R2.fq.gz

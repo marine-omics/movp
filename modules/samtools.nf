@@ -32,14 +32,14 @@ process sidx {
 process flagstat {
 
     input:
-    tuple val(meta), path(bam), path(bai)
+    tuple val(sample), path(bam), path(bai)
 
     output:
     path ("*.flagstat"), emit: flagstat
 
     script:
 
-    def outfile = "${meta.sample}.flagstat"
+    def outfile = "${sample}.flagstat"
 
     """
     samtools flagstat $bam > $outfile
@@ -49,14 +49,14 @@ process flagstat {
 process stat {
 
     input:
-    tuple val(meta), path(bam), path(bai)
+    tuple val(sample), path(bam), path(bai)
 
     output:
     path ("*.stat"), emit: stat
 
     script:
 
-    def outfile = "${meta.sample}.stat"
+    def outfile = "${sample}.stat"
 
     """
     samtools stat $bam > $outfile
@@ -66,19 +66,37 @@ process stat {
 process idxstat {
 
     input:
-    tuple val(meta), path(bam), path(bai)
+    tuple val(sample), path(bam), path(bai)
 
     output:
     path ("*.idxstat"), emit: idxstat
 
     script:
 
-    def outfile = "${meta.sample}.idxstat"
+    def outfile = "${sample}.idxstat"
 
     """
     samtools idxstats $bam > $outfile
     """
 }
+
+process samtools_merge {
+
+    input:
+    tuple val(sample), path(bam)
+
+    output:
+    tuple val(sample), path ("${sample}.bam"), emit: merged_bam
+
+    script:
+
+    def outfile = "${sample}.bam"
+
+    """
+    samtools merge -O BAM $outfile $bam 
+    """
+}
+
 
 // process samtools_idx {
 
