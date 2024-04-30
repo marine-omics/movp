@@ -187,6 +187,10 @@ def flowcellLaneFromFastq(path) {
         return [flowcell:fields[2],lane:fields[3]]
     } else if (fields.size() == 5) {
         return [flowcell:fields[0],lane:fields[1]]
+    } else {
+      // Not standard Illumina format
+      println "Sequence identifier does not conform to Illumina standard. Flowcell and lane will be set to dummy values"
+      return [flowcell:"None",lane:1]
     }
 }
 
