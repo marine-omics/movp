@@ -90,22 +90,20 @@ process freebayes_collect {
 
     input:
     path(vcf)
-    path('sort_vcf_files.sh')
+    path(regions_file)
 
     output:
     path("*.vcf.gz"), emit: vcf
     path("*.vcf.gz.tbi"), emit: vcfi
 
-    script:
 
-    def prefix="freebayes"
+    shell:
+    '''
+    while read region;do echo "freebayes.$region.vcf";done < !{regions_file} | xargs cat | vcffirstheader | vcfstreamsort -w 1000 > freebayes.vcf
 
-    """
-    ./sort_vcf_files.sh | xargs cat | vcffirstheader | vcfstreamsort -w 1000 > ${prefix}.vcf
-
-    bgzip ${prefix}.vcf
-    tabix ${prefix}.vcf.gz
-    """
+    bgzip freebayes.vcf
+    tabix freebayes.vcf.gz
+    '''
 }
 
 

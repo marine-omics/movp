@@ -87,14 +87,14 @@ workflow call_variants {
     ch_baicollection = indexed_bams.map{m,b,i -> i} | collect
 
     if ( callers.contains('freebayes') ){
-        ch_regions = fasta_generate_regions(genome_fasta,genome_fai,params.fb_chunksize)
-        .splitText().map{it -> it.trim()}
+        regions_file = fasta_generate_regions(genome_fasta,genome_fai,params.fb_chunksize)
+        ch_regions = regions_file.splitText().map{it -> it.trim()}
 
 
       // Freebayes
       ch_chunk_vcfs = freebayes(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai,ch_regions,file(params.populations)) | collect
 
-      freebayes_collect(ch_chunk_vcfs,"${projectDir}/shell/sort_vcf_files.sh")
+      freebayes_collect(ch_chunk_vcfs,regions_file)
 
     } 
 
