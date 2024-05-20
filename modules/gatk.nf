@@ -82,8 +82,6 @@ process markadapters {
 
 process bwa_mem_gatk {
 
-//    publishDir "$params.outdir/mapped_bams", mode: 'copy'
-
     input:
     tuple val(meta), path(mkbam), path(ubam)
     path(genome)
@@ -92,7 +90,6 @@ process bwa_mem_gatk {
 
     output:
     tuple val(meta), path("*mapped.bam"), emit: bam
-//    path "*mapped.bam", emit: bam
 
     script:
 

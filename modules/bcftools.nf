@@ -1,29 +1,68 @@
 process mpileup_call {
-    publishDir "$params.outdir/bcftools", mode: 'copy'
+//    publishDir "$params.outdir/bcftools", mode: 'copy'
 
     input:
     path(bam)
     path(bai)
     path fasta
     path fasta_fai
+    val region
 
     output:
-    path("*.vcf.gz"), emit: vcf
-    path("*.vcf.gz.tbi"), emit: vcfi
+    path("*.vcf"), emit: vcf
+//    path("*.vcf.gz.tbi"), emit: vcfi
 
     script:
     def args = task.ext.args ?: ''
 
     """
-    bcftools mpileup -Ou $args -f $fasta $bam | \\
-    bcftools call --threads $task.cpus -mv -Oz -o bcftools.vcf.gz
-
-    tabix bcftools.vcf.gz
+    bcftools mpileup -r $region -Ou $args -f $fasta $bam | \\
+    bcftools call -mv -Ov -o bcftools.${region}.vcf
     """
 
 }
 
+process mpileup_collect {
 
+    publishDir "$params.outdir/bcftools", mode: 'copy'
+
+    input:
+    path(vcf)
+    path(regions_file)
+
+    output:
+    path("*.vcf.gz"), emit: vcf
+    path("*.vcf.gz.tbi"), emit: vcfi
+
+
+    shell:
+    '''
+    while read region;do echo "bcftools.$region.vcf";done < !{regions_file} | xargs cat | vcffirstheader | vcfstreamsort -w 1000 > bcftools.vcf
+
+    bgzip bcftools.vcf
+    tabix bcftools.vcf.gz
+    '''
+}
+
+
+process fasta_generate_chrs {
+
+    input:
+    path fasta
+    path fasta_fai
+
+    output:
+    path("genome.chrs")
+
+    script:
+
+    def args = task.ext.args ?: ''
+
+    """
+    grep '>' ${fasta} | awk '{print \$1}' | sed 's/>//' > genome.chrs
+    """
+
+}
 
 process gatk_gathervcfs {
 
@@ -34,6 +73,7 @@ process gatk_gathervcfs {
 
     output:
     path("gatk.vcf.gz"), emit: vcfz
+    path("gatk.vcf.gz.tbi"), emit: vcfi    
 
     script:
     def args = task.ext.args ?: ''
@@ -41,6 +81,7 @@ process gatk_gathervcfs {
 
     """
     bcftools concat ${vcfs} -O b -o gatk.vcf.gz
+    tabix gatk.vcf.gz
     """
 
 }

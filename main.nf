@@ -7,7 +7,7 @@ include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat; samtools_merge } from './modules/samtools.nf'
 include { freebayes; fasta_generate_regions; freebayes_collect } from './modules/freebayes.nf'
-include { mpileup_call; gatk_gathervcfs } from './modules/bcftools.nf'
+include { mpileup_call; mpileup_collect; fasta_generate_chrs; gatk_gathervcfs } from './modules/bcftools.nf'
 include { name_by_sample } from './modules/util.nf'
 
 workflow qc {
@@ -99,8 +99,12 @@ workflow call_variants {
     } 
 
     if ( callers.contains('bcftools') ){
+      chrs_file = fasta_generate_chrs(genome_fasta,genome_fai)
+      ch_chrs = chrs_file.splitText().map{it -> it.trim()}
+
       // bcftools
-      mpileup_call(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai)  
+      ch_chr_vcfs = mpileup_call(ch_bamcollection,ch_baicollection,genome_fasta,genome_fai,ch_chrs) | collect  
+      mpileup_collect(ch_chr_vcfs,chrs_file)
     } 
 
     if ( callers.contains('gatk') ){
@@ -189,7 +193,8 @@ def flowcellLaneFromFastq(path) {
         return [flowcell:fields[0],lane:fields[1]]
     } else {
       // Not standard Illumina format
-      println "Sequence identifier does not conform to Illumina standard. Flowcell and lane will be set to dummy values"
+      // This print command is too spammy. TODO: Find a way to print just once at startup.
+//      println "Sequence identifier does not conform to Illumina standard. Flowcell and lane will be set to dummy values"
       return [flowcell:"None",lane:1]
     }
 }
