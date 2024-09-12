@@ -23,6 +23,6 @@ jobs:
       run: |
         nextflow run marine-omics/movp -profile docker,test -r main
     - name: Show log
-    - run: |
+      run: |
         cat .nextflow.log
 
