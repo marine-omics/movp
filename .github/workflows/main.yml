@@ -27,6 +27,7 @@ jobs:
       run: |
         pwd
         ls -a 
+        cat .nextflow.log
     - name: Archive nextflow log
       if: always()
       uses: actions/upload-artifact@v4
