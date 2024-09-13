@@ -22,10 +22,7 @@ jobs:
     - name: Run movp test
       run: |
         nextflow run marine-omics/movp -profile docker,test -r main
-    - name: Archive logs
-      uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4
       with:
         name: Nextflow logs
-        path: *.log
-
-
+        path: .nextflow.log
