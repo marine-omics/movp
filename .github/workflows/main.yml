@@ -25,8 +25,8 @@ jobs:
     - name: Whereami
       if: always()
       run: |
-      pwd
-      ls -a 
+        pwd
+        ls -a 
     - name: Archive nextflow log
       if: always()
       uses: actions/upload-artifact@v4
