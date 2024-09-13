@@ -190,6 +190,7 @@ process gatk_genomicsdb_import {
         --reader-threads ${task.cpus} \
         --batch-size 50 \
         --L $region
+    chmod a+rx *.db
     """
 
 }
