@@ -40,9 +40,10 @@ sample,fastq_1,fastq_2
 
 Paths should either be given as absolute paths or relative to the launch directory (where you invoked the nextflow command)
 
-4. Choose a profile for your execution environment. This depends on where you are running your code. `movp` comes with preconfigured profiles that should work on JCU infrastructure. These are
-	- *HPC* (ie zodiac) : Use `-profile zodiac`
+4. Choose a profile for your execution environment. This depends on where you are running your code. `movp` comes with preconfigured profiles that should work on JCU infrastructure and pawsey/setonix. These are
+	- *JCU HPC* (ie zodiac) : Use `-profile zodiac`
 	- *genomics12* (HPC nodes without pbs): Use `-profile genomics`
+	- *setonix*: Use `-profile setonix` and set your slurm account with `--slurm_account pawseyXXXX`
 
 If you need to customise further you can create your own `custom.config` file and invoke with option `-c custom.config`. See [nextflow.config](nextflow.config) for ideas on what parameters can be set.
 
@@ -53,12 +54,8 @@ nextflow run marine-omics/movp -profile singularity,zodiac -r main --genome <gen
 
 # Installing Nextflow on a system with an old java version.
 
-Our JCU HPC systems are still running java 8 but nextflow requires 11 or newer. One way around this is to use [sdkman](https://sdkman.io/) to install and manage a different java version. First install sdkman by following instructions [here](https://sdkman.io/install)
+Our JCU HPC systems are still running java 8 but nextflow requires 11 or newer. One way around this is to use [sdkman](https://sdkman.io/) to install and manage a different java version. This is now the preferred way to install java for nextflow ([See instructions here](https://www.nextflow.io/docs/latest/install.html#install-page). 
 
-Then install java 11 with
-```bash
-sdk install java 11.0.2-open
-```
 
 # Troubleshooting
 
@@ -73,9 +70,9 @@ export NXF_SINGULARITY_CACHEDIR=${HOME}/.nxf/singularity_cache
 ```
 This will create the directory and set the value of `NXF_SINGULARITY_CACHEDIR` for your current login session. To make this setting permanent you should add the export command shown above to your `.bash_profile` 
 
-Next pull the image from dockerhub. This command will download the image, convert to singularity format and place it in your previously defined `NXF_SINGULARITY_CACHEDIR`.  Note that this command is specific for container version `0.3`. 
+Next pull the image from dockerhub. This command will download the image, convert to singularity format and place it in your previously defined `NXF_SINGULARITY_CACHEDIR`.  Note that this command is specific for container version `0.4`. 
 ```bash
-singularity pull  --name ${NXF_SINGULARITY_CACHEDIR}/iracooke-movp-0.3.img docker://iracooke/movp:0.3
+singularity pull  --name ${NXF_SINGULARITY_CACHEDIR}/iracooke-movp-0.4.img docker://iracooke/movp:0.4
 ```
 
 ### Customising resource usage
