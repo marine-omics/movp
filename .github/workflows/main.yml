@@ -22,10 +22,9 @@ jobs:
     - name: Run movp test
       run: |
         nextflow run marine-omics/movp -profile docker,test -r main
-    - name: Show log
-      run: |
-        echo "Showing the log"
-        ls -a ${{ github.workspace }}
-        cat ${{ github.workspace }}/.nextflow.log
+    - name: Archive logs
+      uses: actions/upload-artifact@v4
+      with:
+        path: *.log
 
 
