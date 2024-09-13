@@ -32,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Nextflow logs
-        path: .nextflow.log
+        path: /home/runner/work/movp/movp/.nextflow.log
