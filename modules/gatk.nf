@@ -154,7 +154,7 @@ process gatk_haplotype_caller {
 
     script:
     def args = task.ext.args ?: ''
-    def outfile = "${bam.baseName}.g.vcf.gz"
+    def outfile = "${bam.baseName}.g.vcf.gz*"
 
     """
 
