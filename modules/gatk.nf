@@ -150,11 +150,11 @@ process gatk_haplotype_caller {
 
 
     output:
-    tuple val(sample), path("*.g.vcf.gz"), emit: gvcf
+    tuple val(sample), path("*.g.vcf.gz"), path("*.g.vcf.gz.tbi"), emit: gvcf
 
     script:
     def args = task.ext.args ?: ''
-    def outfile = "${bam.baseName}.g.vcf.gz*"
+    def outfile = "${bam.baseName}.g.vcf.gz"
 
     """
 

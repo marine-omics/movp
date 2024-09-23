@@ -111,7 +111,7 @@ workflow call_variants {
       // gatk
       ch_gvcfs = gatk_haplotype_caller(indexed_bams,genome_fasta,genome_fai,genome_dict)
 
-      samples_gvcfs_file = ch_gvcfs.collectFile(name: 'sample_map.txt', newLine:true){s,b -> "$s\t$b" } | collect
+      samples_gvcfs_file = ch_gvcfs.collectFile(name: 'sample_map.txt', newLine:true){s,b,tbi -> "$s\t$b" } | collect
 
 
       ch_gatk_regions = genome_fasta
