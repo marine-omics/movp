@@ -33,7 +33,6 @@ process freebayes_parallel {
 
         bgzip ${prefix}.vcf
         tabix ${prefix}.vcf.gz
-        find ./ -type l | xargs rm
         """
 
     } else {
@@ -48,7 +47,6 @@ process freebayes_parallel {
 
         bgzip ${prefix}.vcf
         tabix ${prefix}.vcf.gz
-        find ./ -type l | xargs rm
         """
     }
 
