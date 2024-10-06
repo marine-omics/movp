@@ -13,11 +13,12 @@ process mpileup_call {
 //    path("*.vcf.gz.tbi"), emit: vcfi
 
     script:
+    def callargs = task.ext.callargs ?: ''
     def args = task.ext.args ?: ''
 
     """
-    bcftools mpileup -r $region -Ou $args -f $fasta $bam | \\
-    bcftools call -mv -Ov -o bcftools.${region}.vcf
+    bcftools mpileup --threads ${task.cpus} -r $region -Ou $args -f $fasta $bam | \\
+    bcftools call --threads ${task.cpus} $callargs -v -Ov -o bcftools.${region}.vcf
     """
 
 }
