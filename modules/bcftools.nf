@@ -17,7 +17,8 @@ process mpileup_call {
     def args = task.ext.args ?: ''
 
     """
-    bcftools mpileup --threads ${task.cpus} -r $region -Ou $args -f $fasta $bam | \\
+    ls *.bam > bamlist.txt
+    bcftools mpileup --threads ${task.cpus} -r $region -Ou $args -f $fasta -b bamlist.txt | \\
     bcftools call --threads ${task.cpus} $callargs -v -Ov -o bcftools.${region}.vcf
     """
 
