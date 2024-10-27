@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc_fastqc; multiqc_fastp; multiqc_bams } from './modules/multiqc.nf'
 include { fastp } from './modules/fastp.nf'
-include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk_mark_duplicates; gatk_haplotype_caller; gatk_genomicsdb_import; gatk_genotypegvcfs } from './modules/gatk.nf'
+include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk4_createintervallist; gatk_scatterintervals; gatk_mark_duplicates; gatk_haplotype_caller; gatk_genomicsdb_import; gatk_genotypegvcfs } from './modules/gatk.nf'
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat; samtools_merge } from './modules/samtools.nf'
 include { freebayes; fasta_generate_regions; freebayes_collect } from './modules/freebayes.nf'
@@ -73,6 +73,8 @@ workflow bam_qc {
     multiqc_bams(fs,s,idxf)
 }
 
+
+
 workflow call_variants {
   take:
     callers
@@ -108,19 +110,29 @@ workflow call_variants {
     } 
 
     if ( callers.contains('gatk') ){
+      genome_intervals = gatk4_createintervallist(genome_fai,genome_dict)
+      ch_gatk_scatter_intervals = gatk_scatterintervals(genome_intervals,params.gatk_chunksize) | flatten
+
+      ch_hc_inputs = indexed_bams.combine(ch_gatk_scatter_intervals)
+
+
       // gatk
-      ch_gvcfs = gatk_haplotype_caller(indexed_bams,genome_fasta,genome_fai,genome_dict)
+      ch_gvcfs = gatk_haplotype_caller(ch_hc_inputs,genome_fasta,genome_fai,genome_dict)
 
-      samples_gvcfs_file = ch_gvcfs.collectFile(name: 'sample_map.txt', newLine:true){s,b,tbi -> "$s\t$b" } | collect
+      samples_gvcfs_file = ch_gvcfs.collectFile{ 
+        s,i,b,tbi -> [ "${i}.sample_map" , "$s\t$b\n" ]
+      }.map {
+        it -> [file(it).baseName, it ]
+      }
+
+      ch_sample_maps_per_region = ch_gatk_scatter_intervals.map{ 
+        it -> [file(it).baseName, it ]
+      }.join(samples_gvcfs_file)
 
 
-      ch_gatk_regions = genome_fasta
-      .splitFasta( record: [id: true, seqString: false] )
-      .map { record -> record.id[0] }
+      ch_gdb = gatk_genomicsdb_import(ch_sample_maps_per_region)
 
-
-      ch_gdb = gatk_genomicsdb_import(ch_gatk_regions,samples_gvcfs_file)
-
+      ch_gdb.view()
 
       ch_gatk_vcfs = gatk_genotypegvcfs(ch_gdb,genome_fasta,genome_fai,genome_dict) | collect
 
@@ -134,6 +146,7 @@ workflow {
   genome_index = bwa_index(genome_fasta) | collect
   genome_fai = faidx(genome_fasta) | collect
   genome_dict = gatk4_createsequencedict(genome_fasta) | collect
+
 
 // Preprocess data
   ch_input_sample = extract_csv(file(params.samples, checkIfExists: true))

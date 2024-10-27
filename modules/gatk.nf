@@ -12,6 +12,44 @@ process gatk4_createsequencedict {
     """
 }
 
+process gatk4_createintervallist {
+  input:
+    path(reffaidx)
+    path(refdict)
+
+  output:
+    path("*.interval_list")
+
+
+  script:
+    def outfile = "${refdict.baseName}.interval_list"
+
+  """
+  cat $reffaidx | awk '{OFS="\t";print \$1,0,\$2}' > ref.bed
+  gatk BedToIntervalList -I ref.bed -O $outfile -SD $refdict
+  """
+}
+
+process gatk_scatterintervals {
+  input:
+    path(intervallist)
+    val(chunksize)
+
+  output:
+    path("scatter_temp*.interval_list")
+
+  script:
+
+  """
+  mkdir scatter
+  gatk IntervalListTools -I $intervallist --SCATTER_CONTENT $chunksize -O scatter
+  for f in \$(find scatter -name '*.interval_list');do 
+    tn=\$(echo \$f | sed 's:/:_:g');
+    cp \$f \$tn
+  done
+  """
+}
+
 
 process fastq2ubam {
 
@@ -143,18 +181,18 @@ process gatk_mark_duplicates {
 process gatk_haplotype_caller {
 
     input:
-      tuple val(sample), path(bam), path(bai)
+      tuple val(sample), path(bam), path(bai), path(interval)
       path(genome)
       path(index)
       path(dict)
 
 
     output:
-    tuple val(sample), path("*.g.vcf.gz"), path("*.g.vcf.gz.tbi"), emit: gvcf
+    tuple val(sample),val(interval.baseName), path("*.g.vcf.gz"), path("*.g.vcf.gz.tbi"), emit: gvcf
 
     script:
     def args = task.ext.args ?: ''
-    def outfile = "${bam.baseName}.g.vcf.gz"
+    def outfile = "${bam.baseName}.${interval.baseName}.g.vcf.gz"
 
     """
 
@@ -163,6 +201,7 @@ process gatk_haplotype_caller {
         --native-pair-hmm-threads $task.cpus \
         -R $genome \
         -I $bam \
+        -L $interval \
         -O $outfile \
         -contamination 0 -ERC GVCF
     """
@@ -173,11 +212,10 @@ process gatk_haplotype_caller {
 process gatk_genomicsdb_import {
 
     input:
-      val(region)
-      path(samplemap)
+      tuple val(regionid), path(intervallist), path(samplemap)
 
     output:
-    tuple val(region), path("*.gatk.db"), emit: gdb
+    tuple val(regionid), path(intervallist), path("*.gatk.db"), emit: gdb
 
     script:
     def args = task.ext.args ?: ''
@@ -185,11 +223,11 @@ process gatk_genomicsdb_import {
     """
     gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
         GenomicsDBImport \
-        --genomicsdb-workspace-path ${region}.gatk.db \
+        --genomicsdb-workspace-path ${regionid}.gatk.db \
         --sample-name-map $samplemap \
         --reader-threads ${task.cpus} \
         --batch-size 50 \
-        --L $region
+        --L ${intervallist}
     chmod a+rx *.db
     """
 
@@ -201,13 +239,13 @@ process gatk_genomicsdb_import {
 process gatk_genotypegvcfs {
 
     input:
-      tuple val(region), path(gdb)
+      tuple val(regionid), path(intervallist), path(gdb)
       path(genome)
       path(index)
       path(dict)
 
     output:
-    path("${region}.vcf.gz"), emit: vcfz
+    path("${regionid}.vcf.gz"), emit: vcfz
 
     script:
     def args = task.ext.args ?: ''
@@ -216,11 +254,11 @@ process gatk_genotypegvcfs {
     gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
         GenotypeGVCFs \
         -R $genome \
-        -O ${region}.vcf.gz \
+        -O ${regionid}.vcf.gz \
         --only-output-calls-starting-in-intervals \
         --use-new-qual-calculator \
         -V gendb://${gdb} \
-        -L $region
+        -L $intervallist
     """
 
 }
