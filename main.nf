@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc_fastqc; multiqc_fastp; multiqc_bams } from './modules/multiqc.nf'
 include { fastp } from './modules/fastp.nf'
-include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk4_createintervallist; gatk_scatterintervals; gatk_mark_duplicates; gatk_haplotype_caller; gatk_genomicsdb_import; gatk_genotypegvcfs } from './modules/gatk.nf'
+include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk4_createintervallist; gatk_scatterintervals; gatk_mark_duplicates; gatk_haplotype_caller; gatk_genomicsdb_import; gatk_genotypegvcfs; gatk_mergevcfs } from './modules/gatk.nf'
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat; samtools_merge } from './modules/samtools.nf'
 include { freebayes; fasta_generate_regions; freebayes_collect } from './modules/freebayes.nf'
@@ -132,9 +132,11 @@ workflow call_variants {
 
       ch_gdb = gatk_genomicsdb_import(ch_sample_maps_per_region)
 
-      ch_gatk_vcfs = gatk_genotypegvcfs(ch_gdb,genome_fasta,genome_fai,genome_dict) | collect
+      ch_gatk_vcfs = gatk_genotypegvcfs(ch_gdb,genome_fasta,genome_fai,genome_dict) 
 
-      gatk_gathervcfs(ch_gatk_vcfs)
+      vcf_list = ch_gatk_vcfs.collectFile( name: "vcf.list", newLine:true){ id,f -> "$f" } | collect
+
+      gatk_mergevcfs(vcf_list,genome_dict)
     }
 }
 

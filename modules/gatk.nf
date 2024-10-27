@@ -245,7 +245,7 @@ process gatk_genotypegvcfs {
       path(dict)
 
     output:
-    path("${regionid}.vcf.gz"), emit: vcfz
+      tuple val(regionid), path("${regionid}.vcf.gz"), emit: vcfz
 
     script:
     def args = task.ext.args ?: ''
@@ -264,7 +264,28 @@ process gatk_genotypegvcfs {
 }
 
 
+process gatk_mergevcfs {
 
+  publishDir "$params.outdir/gatk", mode: 'copy'
+
+  input:
+    path(vcflist)
+    path(dict)
+
+  output:
+    path("gatk.vcf.gz"), emit: vcfz
+    path("gatk.vcf.gz.tbi"), emit: vcfi 
+
+  script:
+
+    """
+    gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
+        MergeVcfs \
+        -I $vcflist \
+        -D $dict \
+        -O gatk.vcf.gz
+    """
+}
 
 
 
