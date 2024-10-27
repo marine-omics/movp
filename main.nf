@@ -132,8 +132,6 @@ workflow call_variants {
 
       ch_gdb = gatk_genomicsdb_import(ch_sample_maps_per_region)
 
-      ch_gdb.view()
-
       ch_gatk_vcfs = gatk_genotypegvcfs(ch_gdb,genome_fasta,genome_fai,genome_dict) | collect
 
       gatk_gathervcfs(ch_gatk_vcfs)
