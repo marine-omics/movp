@@ -221,7 +221,7 @@ process gatk_genomicsdb_import {
     def args = task.ext.args ?: ''
 
     """
-    gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
+    gatk --java-options "-Xmx${task.memory.giga-1}g" \
         GenomicsDBImport \
         --genomicsdb-workspace-path ${regionid}.gatk.db \
         --sample-name-map $samplemap \
