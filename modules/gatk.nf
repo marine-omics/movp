@@ -105,14 +105,16 @@ process markadapters {
 
     script:
 
+    def args = task.ext.args ?: ''
+
     def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
 
     """
     gatk MarkIlluminaAdapters \
     -I $ubam \
     -M ${read_group}_txt \
+    $args \
     -O ${read_group}_marked.bam 
-
     """
 }
 
