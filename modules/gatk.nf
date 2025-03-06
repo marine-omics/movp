@@ -134,6 +134,7 @@ process bwa_mem_gatk {
     script:
 
     def halfmem = task.memory.giga/2
+    def threads = task.cpus*2
 
     def outfile = "${mkbam.baseName}_mapped.bam"
 
@@ -143,7 +144,7 @@ process bwa_mem_gatk {
     -FASTQ /dev/stdout \
     -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 -INTERLEAVE true -NON_PF true \
     |  \
-    bwa mem -M -t $task.cpus -p $genome /dev/stdin \
+    bwa mem -M -t ${threads} -p $genome /dev/stdin \
     | \
     gatk --java-options "-Xmx${halfmem}G" MergeBamAlignment \
     -ALIGNED_BAM /dev/stdin \
