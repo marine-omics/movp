@@ -66,7 +66,7 @@ process fastq2ubam {
       def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
       if (meta.single_end) {
         """
-        gatk FastqToSam \\
+        gatk --java-options "-Xmx${task.memory.giga}G" FastqToSam \\
         -FASTQ ${reads[0]} \\
           -OUTPUT ${read_group}.bam \\
           -READ_GROUP_NAME ${read_group} \\
@@ -77,7 +77,7 @@ process fastq2ubam {
         """
         } else {
         """
-        gatk FastqToSam \\
+        gatk --java-options "-Xmx${task.memory.giga}G" FastqToSam \\
         -FASTQ ${reads[0]} \\
         -FASTQ2 ${reads[1]} \\
           -OUTPUT ${read_group}.bam \\
@@ -110,7 +110,7 @@ process markadapters {
     def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
 
     """
-    gatk MarkIlluminaAdapters \
+    gatk --java-options "-Xmx${task.memory.giga}G" MarkIlluminaAdapters \
     -I $ubam \
     -M ${read_group}_txt \
     $args \
@@ -133,17 +133,19 @@ process bwa_mem_gatk {
 
     script:
 
+    def halfmem = task.memory.giga/2
+
     def outfile = "${mkbam.baseName}_mapped.bam"
 
     """
-    gatk SamToFastq \
+    gatk --java-options "-Xmx${halfmem}G" SamToFastq \
     -I $mkbam \
     -FASTQ /dev/stdout \
     -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 -INTERLEAVE true -NON_PF true \
     |  \
     bwa mem -M -t $task.cpus -p $genome /dev/stdin \
     | \
-    gatk MergeBamAlignment \
+    gatk --java-options "-Xmx${halfmem}G" MergeBamAlignment \
     -ALIGNED_BAM /dev/stdin \
     -UNMAPPED_BAM $ubam \
     -OUTPUT $outfile \
