@@ -22,7 +22,7 @@ graph TD;
 
 ## Quick Start
 
-1. Install [nextflow](https://www.nextflow.io/). If working on the AIMS HPC, Nextflow is already installed (as of March 2025). Current version: 23.10.0 build 5889, created 15-10-2023 15:07 UTC
+1. Install [nextflow](https://www.nextflow.io/). If working on the AIMS HPC, Nextflow is already installed as a module (as of March 2025). Current version: 23.10.0 build 5889, created 15-10-2023 15:07 UTC. Use `module load nextflow` to be able to use it.
 2. Download docker image and convert to singularity (see below)
 3. Run a test to make sure everything is installed properly. The command below should work on a linux machine with singularity installed (eg AIMS/JCU HPC). 
 ```bash
