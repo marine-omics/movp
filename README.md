@@ -37,6 +37,7 @@ sample,fastq_1,fastq_2
 Paths should either be given as absolute paths or relative to the launch directory (where you invoked the nextflow command)
 
 **LORENZO <- need to check and test correct profile for AIMS HPC**
+
 5. Choose a profile for your execution environment. This depends on where you are running your code. `movp` comes with preconfigured profiles that should work on JCU infrastructure and pawsey/setonix. These are
 	- *JCU HPC* (ie zodiac) : Use `-profile zodiac`
 	- *genomics12* (HPC nodes without pbs): Use `-profile genomics`
