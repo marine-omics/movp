@@ -1,6 +1,6 @@
 # Marine Omics Variant Pipeline
 
-![Build](https://github.com/marine-omics/movp/actions/workflows/main.yml/badge.svg)
+![Visual summary of movp workflow](https://github.com/marine-omics/MboiTui/images/movp-workflow-graph.png)
 
 Designed to process data from raw reads through to vcf. 
 
