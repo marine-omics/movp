@@ -2,23 +2,9 @@
 
 ![Build](https://github.com/marine-omics/movp/actions/workflows/main.yml/badge.svg)
 
-Designed to process data from raw reads through to vcf. 
+Designed to process data from raw reads through to vcf.
 
-```mermaid
-graph TD;
-	fastq-->fastqc;
-	fastqc-->multiqc;
-	fastq-->fastp;
-	fastp-->multiqc;
-	fastp-->bwa_mem;
-	genome-->bwa_index;
-	bwa_index-->bwa_mem;
-	bwa_mem-->gatk_mark_duplicates;
-	gatk_mark_duplicates-->samtools_stats;
-	samtools_stats-->multiqc;
-	gatk_mark_duplicates-->freebayes;
-	gatk_mark_duplicates-->bcftools_mpileup;
-```
+![Visual summary of movp workflow](images/movp-workflow-graph.png)
 
 # Quick Start
 
