@@ -198,12 +198,13 @@ process gatk_haplotype_caller {
     script:
     def args = task.ext.args ?: ''
     def outfile = "${bam.baseName}.${interval.baseName}.g.vcf.gz"
+    def threads = task.cpus*2
 
     """
 
     gatk --java-options "-Xmx${task.memory.giga}G" \
         HaplotypeCaller \
-        --native-pair-hmm-threads $task.cpus \
+        --native-pair-hmm-threads ${threads} \
         -R $genome \
         -I $bam \
         -L $interval \
