@@ -72,7 +72,7 @@ workflow gatk_map {
     mapped_marked_bams = gatk_mark_duplicates(ch_persample_bams)
 
   emit:
-    mapped_marked_bams
+    mapped_marked_bams.mbam
 }
 
 workflow bam_qc {

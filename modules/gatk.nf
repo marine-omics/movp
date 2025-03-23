@@ -167,6 +167,7 @@ process gatk_mark_duplicates {
 
   output:
     tuple val(sample), path("*.bam"), emit: mbam
+    tuple val(sample), path("*_duplicatemetrics.txt"), emit: dupmetrics
 
   script:
 
@@ -178,7 +179,7 @@ process gatk_mark_duplicates {
     gatk --java-options "-Xmx${task.memory.giga}G" MarkDuplicates \
       -I $bam -O $outfile \
       $args \
-      -METRICS_FILE ${bam.baseName}_markduplicates_txt
+      -METRICS_FILE ${bam.baseName}_duplicatemetrics.txt
   """
 }
 

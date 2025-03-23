@@ -31,6 +31,8 @@ process sidx {
 
 process flagstat {
 
+    publishDir "$params.outdir/bamstats", mode: 'copy'  
+
     input:
     tuple val(sample), path(bam), path(bai)
 
@@ -48,6 +50,8 @@ process flagstat {
 
 process stat {
 
+    publishDir "$params.outdir/bamstats", mode: 'copy'
+
     input:
     tuple val(sample), path(bam), path(bai)
 
@@ -64,6 +68,8 @@ process stat {
 }
 
 process idxstat {
+
+    publishDir "$params.outdir/bamstats", mode: 'copy'  
 
     input:
     tuple val(sample), path(bam), path(bai)
@@ -96,18 +102,3 @@ process samtools_merge {
     samtools merge -O BAM $outfile $bam 
     """
 }
-
-
-// process samtools_idx {
-
-//     input:
-//     path bam
-
-//     output:
-//     tuple bam, path "*.bai" , emit: ibam
-
-//     script:
-//     """
-//     samtools index $bam
-//     """
-// }
