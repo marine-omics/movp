@@ -9,7 +9,7 @@ process extract_umis {
     script:
 
       def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
-      def umibam = ${read_group}.withUMI.bam
+      def umibam = "${read_group}.withUMI.bam"
 
       if (meta.single_end) {
         """
