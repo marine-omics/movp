@@ -46,12 +46,13 @@ workflow gatk_map {
     genome_dict
 
   main:
-    ch_ubams = preads | fastq2ubam
+
     if ( params.idt ){
-        ch_marked_bams =  ch_ubams | extract_umis | markadapters
+        ch_ubams = preads | fastq2ubam | extract_umis
     } else {
-      ch_marked_bams =  ch_ubams | markadapters      
+        ch_ubams = preads | fastq2ubam       
     }
+    ch_marked_bams =  ch_ubams | markadapters         
     ch_merge_bams = ch_ubams.join(ch_marked_bams)
 
     mapped_bams = bwa_mem_gatk(ch_merge_bams,genome_fasta,genome_index, genome_dict)
