@@ -13,9 +13,10 @@ include { name_by_sample } from './modules/util.nf'
 
 // Command line parameters
 params.idt = false
+params.nocall = false
 
 println("IDT: ${params.idt}")
-
+println("Preprocess only: ${params.nocall}")
 
 workflow qc {
   take:
@@ -174,12 +175,14 @@ workflow {
 
   ch_bbai | bam_qc
 
-// Parse caller param
-  callerlist = params.callers?.split(',') as List
 
-// Do the actual variant calling
-  call_variants(callerlist,ch_bbai,genome_fasta,genome_fai,genome_dict)
+  if ( !params.nocall ){
+    // Parse caller param
+    callerlist = params.callers?.split(',') as List
 
+    // Do the actual variant calling
+    call_variants(callerlist,ch_bbai,genome_fasta,genome_fai,genome_dict)
+  }
 
 
 }
