@@ -21,7 +21,7 @@ jobs:
         sudo mv nextflow /usr/local/bin/
     - name: Run movp test full
       run: |
-        nextflow run marine-omics/movp -profile docker,test
+        nextflow run movp/main.nf -profile docker,test
     - name: Run movp test nocall
       run: |
         nextflow run marine-omics/movp -profile docker,test --nocall
