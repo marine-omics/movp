@@ -17,6 +17,7 @@ params.nocall = false
 params.samples = null
 params.bams = null
 
+
 println("IDT: ${params.idt}")
 println("Preprocess only: ${params.nocall}")
 
