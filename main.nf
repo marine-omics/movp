@@ -14,6 +14,8 @@ include { name_by_sample } from './modules/util.nf'
 // Command line parameters
 params.idt = false
 params.nocall = false
+params.samples = null
+params.bams = null
 
 println("IDT: ${params.idt}")
 println("Preprocess only: ${params.nocall}")
@@ -162,13 +164,23 @@ workflow {
 
 
 // Preprocess data
-  ch_input_sample = extract_csv(file(params.samples, checkIfExists: true))
+  if (params.bams){
+     
+    ch_mapped_marked_bams = extract_samples_bam(file(params.bams,checkIfExists:true))
 
-  ch_input_sample | qc
+  } else {
+    if (!params.samples){
+         println("Error: You must supply either a samples or a bams file")      
+    }
 
-  ch_prep_reads = ch_input_sample | preprocess
+    ch_input_sample = extract_samples_csv(file(params.samples, checkIfExists: true))
 
-  ch_mapped_marked_bams = gatk_map(ch_prep_reads,genome_fasta,genome_index, genome_dict)
+    ch_input_sample | qc
+
+    ch_prep_reads = ch_input_sample | preprocess
+
+    ch_mapped_marked_bams = gatk_map(ch_prep_reads,genome_fasta,genome_index, genome_dict)
+  } 
 
   ch_mapped_marked_bais = ch_mapped_marked_bams | sidx
 
@@ -235,7 +247,7 @@ def resolve_path(pathstring){
   }
 }
 
-def extract_csv(csv_file) {
+def extract_samples_csv(csv_file) {
     Channel.from(csv_file).splitCsv(header: true)
     .map{ row -> 
       def meta = [:]
@@ -253,5 +265,16 @@ def extract_csv(csv_file) {
       reads.removeAll([null])
 
       [meta,reads]
+    }
+}
+
+
+def extract_samples_bam(csv_file) {
+    Channel.from(csv_file).splitCsv(header: true)
+    .map{ row -> 
+      def sample = row.sample
+      def bam     = file(resolve_path(row.bam), checkIfExists: true)
+
+      [sample,bam]
     }
 }

@@ -19,9 +19,15 @@ jobs:
       run: |
         curl -s https://get.nextflow.io | bash
         sudo mv nextflow /usr/local/bin/
-    - name: Run movp test
+    - name: Run movp test full
       run: |
         nextflow run marine-omics/movp -profile docker,test -r main
+    - name: Run movp test nocall
+      run: |
+        nextflow run marine-omics/movp -profile docker,test -r main --nocall
+    - name: Run movp test bams
+      run: |
+        nextflow run marine-omics/movp -profile docker,testbam -r main       
     - name: Show Log
       if: always()
       run: |
