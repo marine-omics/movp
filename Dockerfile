@@ -1,13 +1,13 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  build-essential unzip wget openjdk-11-jre time locales \
-  make python3-pip \
+  build-essential unzip wget openjdk-17-jre time locales \
+  make python-is-python3 python3-pip \
   python3-dev \
   cpanminus bwa \
-  libncurses5-dev libbz2-dev liblzma-dev python \
+  libncurses5-dev libbz2-dev liblzma-dev \
   bc parallel meson ninja-build libvcflib-tools vcftools zlib1g pkg-config cmake
 
 
