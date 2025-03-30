@@ -165,7 +165,7 @@ workflow {
 
 // Preprocess data
   if (params.bams){
-     
+    println("Starting from bams in file ${params.nocall}")  
     ch_mapped_marked_bams = extract_samples_bam(file(params.bams,checkIfExists:true))
 
   } else {
