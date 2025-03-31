@@ -38,6 +38,30 @@ If you need to customise further you can create your own `custom.config` file an
 nextflow run marine-omics/movp -profile singularity,zodiac -r main --genome <genomefile> --samples <samples.csv> --outdir myoutputs
 ```
 
+# Alternative way to run the workflow
+
+Instead of running the entire workflow from start to finish it is often better to break it into steps.  This provides more ability to troubleshoot problems with data and also reduces the total number of inodes used by the workflow. 
+
+Use the `--nocall` option to run only the preprocessing steps.  This produces mapped bam files with duplicates marked.  These are ready for analysis with many other workflows and tools such as ANGSD or popoolation. 
+
+```
+nextflow run marine-omics/movp -latest -profile docker,test -r main --nocall
+```
+
+After running this step you can then collect the bam files in the output of this step.  Let's say those are collected into the `out` directory. Make a bams input file as in the following example
+
+```
+sample,bam
+1,out/mapped_marked_bams/1_marked.bam
+2,out/mapped_marked_bams/2_marked.bam
+```
+
+If this file is bams.csv
+
+```
+nextflow run marine-omics/movp -latest -profile docker,test -r main --bams bams.csv
+```
+
 # Installing Nextflow on a system with an old java version.
 
 Our JCU HPC systems are still running java 8 but nextflow requires 11 or newer. One way around this is to use [sdkman](https://sdkman.io/) to install and manage a different java version. This is now the preferred way to install java for nextflow ([See instructions here](https://www.nextflow.io/docs/latest/install.html#install-page). 
