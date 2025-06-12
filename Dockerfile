@@ -8,14 +8,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   python3-dev \
   cpanminus bwa \
   libncurses5-dev libbz2-dev liblzma-dev \
-  bc parallel meson ninja-build libvcflib-tools vcftools zlib1g pkg-config cmake
+  bc parallel meson ninja-build libvcflib-tools vcftools zlib1g pkg-config cmake \
+  r-cran-tidyverse gfortran
 
 
 WORKDIR /usr/local/
 
-RUN wget 'http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip' && \
-  unzip fastqc_v0.11.5.zip && \
-  rm fastqc_v0.11.5.zip && \
+
+
+RUN wget 'https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.12.1.zip' && \
+  unzip fastqc_v0.12.1.zip && \
+  rm fastqc_v0.12.1.zip && \
   cd FastQC && \
   chmod 755 fastqc && \
   ln -s /usr/local/FastQC/fastqc /usr/local/bin/fastqc
@@ -53,6 +56,10 @@ RUN wget 'https://github.com/broadinstitute/gatk/releases/download/4.6.1.0/gatk-
   unzip gatk-4.6.1.0.zip && rm gatk-4.6.1.0.zip
 
 ENV PATH=/usr/local/gatk-4.6.1.0/:${PATH}
+
+# Needs R and packages for plotting https://gatk.broadinstitute.org/hc/en-us/articles/360035889531-What-are-the-requirements-for-running-GATK
+RUN Rscript -e "install.packages(c('gplots','reshape','gsalib'))"
+
 
 
 RUN wget 'https://github.com/freebayes/freebayes/releases/download/v1.3.6/freebayes-1.3.6-src.tar.gz' && \
