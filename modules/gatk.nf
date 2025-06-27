@@ -256,9 +256,10 @@ process gatk_genotypegvcfs {
 
     script:
     def args = task.ext.args ?: ''
+    def heap_gb = (task.memory.giga * params.java_heap_fraction) as int
 
     """
-    gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
+    gatk --java-options "-Xmx${heap_gb}g -Xms${heap_gb}g -Xlog:gc*:file=gc.log" \
         GenotypeGVCFs \
         -R $genome \
         -O ${regionid}.vcf.gz \
