@@ -285,15 +285,19 @@ process gatk_mergevcfs {
     path("gatk.vcf.gz.tbi"), emit: vcfi 
 
   script:
+    def args = task.ext.args ?: ''
+    def heap_gb = (task.memory.giga * params.java_heap_fraction) as int
 
     """
-    gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
+    gatk --java-options "-Xmx{heap_gb}g -Xms{heap_gb}g" \
         MergeVcfs \
+        --MAX_RECORDS_IN_RAM 100000 \
         -I $vcflist \
         -D $dict \
         -O gatk.vcf.gz
     """
 }
 
-
-
+// Changed Xmx and Xms to 70% of tastk.memory.giga, to allow for memory outside java heap
+// Reduced task.memory.giga to 100, as it might allow for Garbage Control to work better
+// Added --MAX_RECORDS_IN_RAM 100000 (instead of default 500000) to try and address memory issue
