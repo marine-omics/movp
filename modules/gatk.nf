@@ -271,26 +271,48 @@ process gatk_genotypegvcfs {
 
 }
 
+// FIX -I $vcflist, need to expand the list
+process gatk_gathervcfs {
 
-process gatk_mergevcfs {
+    publishDir "$params.outdir/gatk", mode: 'copy'
 
-  publishDir "$params.outdir/gatk", mode: 'copy'
+    input:
+      path(vcflist)
 
-  input:
-    path(vcflist)
-    path(dict)
+    output:
+      path("gatk.vcf.gz"), emit: vcfz
+      path("gatk.vcf.gz.tbi"), emit: vcfi
 
-  output:
-    path("gatk.vcf.gz"), emit: vcfz
-    path("gatk.vcf.gz.tbi"), emit: vcfi 
+    script:
 
-  script:
-
-    """
-    gatk --java-options "-Xmx{task.memory.giga}g -Xms{task.memory.giga}g" \
-        MergeVcfs \
-        -I $vcflist \
-        -D $dict \
-        -O gatk.vcf.gz
-    """
+      """
+      gatk --java-options "-Xmx{task.memory.giga}g -Xms{task.memory.giga}g" \
+	GatherVcfs \
+	-I $vcflist \
+	-O gatk.vcf.gz
+      """
 }
+
+// Previously using picard's mergeVCF
+//process gatk_mergevcfs {
+//
+//  publishDir "$params.outdir/gatk", mode: 'copy'
+//
+//  input:
+//    path(vcflist)
+//    path(dict)
+//
+//  output:
+//    path("gatk.vcf.gz"), emit: vcfz
+//    path("gatk.vcf.gz.tbi"), emit: vcfi
+//
+//  script:
+//
+//    """
+//   gatk --java-options "-Xmx{task.memory.giga}g -Xms{task.memory.giga}g" \
+//        MergeVcfs \
+//        -I $vcflist \
+//        -D $dict \
+//        -O gatk.vcf.gz
+//    """
+//}
