@@ -4,7 +4,7 @@
 
 Designed to process data from raw reads through to vcf. 
 
-![Visual summary of workflow](images/movp-workflow-graph-split.png)
+![Visual summary of workflow](images/movp-workflow-graph-split-noBkg.png)
 
 # Quick Start
 
