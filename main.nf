@@ -8,7 +8,7 @@ include { extract_umis } from './modules/fgbio.nf'
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat; samtools_merge } from './modules/samtools.nf'
 include { freebayes; fasta_generate_regions; freebayes_collect } from './modules/freebayes.nf'
-include { mpileup_call; mpileup_collect; fasta_generate_chrs; gatk_gathervcfs } from './modules/bcftools.nf'
+include { mpileup_call; mpileup_collect; fasta_generate_chrs; bcftools_concat } from './modules/bcftools.nf'
 include { name_by_sample } from './modules/util.nf'
 
 // Command line parameters
@@ -153,12 +153,13 @@ workflow call_variants {
 
       ch_gatk_vcfs = gatk_genotypegvcfs(ch_gdb,genome_fasta,genome_fai,genome_dict) 
 
-      vcf_list = ch_gatk_vcfs.collectFile( name: "vcf.list", newLine:true){ id,f -> "$f" } | collect
+      vcf_list = ch_gatk_vcfs.collectFile( name: "vcf.list", newLine:true){ id,f -> "$f" }
 
       gatk_gathervcfs(vcf_list)
 
       // Switched from merge to gather, old code below
       // gatk_mergevcf(vcf_list, genome_dict)
+      // Note, I also removed '| collect' from the end of vcf_list = ... line
     }
 }
 

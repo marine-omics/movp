@@ -240,9 +240,6 @@ process gatk_genomicsdb_import {
 
 }
 
-
-
-
 process gatk_genotypegvcfs {
 
     input:
@@ -271,7 +268,6 @@ process gatk_genotypegvcfs {
 
 }
 
-// FIX -I $vcflist, need to expand the list
 process gatk_gathervcfs {
 
     publishDir "$params.outdir/gatk", mode: 'copy'
@@ -284,17 +280,21 @@ process gatk_gathervcfs {
       path("gatk.vcf.gz.tbi"), emit: vcfi
 
     script:
-
       """
-      gatk --java-options "-Xmx{task.memory.giga}g -Xms{task.memory.giga}g" \
-	GatherVcfs \
-	-I $vcflist \
+      # Construct GatherVcfs inputs string
+      sort ${vcflist} | xargs -I{} echo "-I {}" | tr '\\n' ' ' > inputs.txt
+
+      gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
+	GatherVcfs \$(cat inputs.txt) \
 	-O gatk.vcf.gz
+
+      # Create tabix index explicitly, as gatherVcf does not produce one
+      tabix -p vcf gatk.vcf.gz
       """
 }
 
 // Previously using picard's mergeVCF
-//process gatk_mergevcfs {
+// process gatk_mergevcfs {
 //
 //  publishDir "$params.outdir/gatk", mode: 'copy'
 //
@@ -315,4 +315,4 @@ process gatk_gathervcfs {
 //        -D $dict \
 //        -O gatk.vcf.gz
 //    """
-//}
+// }
