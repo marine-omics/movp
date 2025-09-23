@@ -240,9 +240,6 @@ process gatk_genomicsdb_import {
 
 }
 
-
-
-
 process gatk_genotypegvcfs {
 
     input:
@@ -271,29 +268,51 @@ process gatk_genotypegvcfs {
 
 }
 
+process gatk_gathervcfs {
 
-process gatk_mergevcfs {
+    publishDir "$params.outdir/gatk", mode: 'copy'
 
-  publishDir "$params.outdir/gatk", mode: 'copy'
+    input:
+      path(vcflist)
 
-  input:
-    path(vcflist)
-    path(dict)
+    output:
+      path("gatk.vcf.gz"), emit: vcfz
+      path("gatk.vcf.gz.tbi"), emit: vcfi
 
-  output:
-    path("gatk.vcf.gz"), emit: vcfz
-    path("gatk.vcf.gz.tbi"), emit: vcfi 
+    script:
+      """
+      # Construct GatherVcfs inputs string with ordered scattered vcfs
+      awk -F/ '{print \$NF "\t" \$0}' ${vcflist} | sort -k1,1V | cut -f2 | xargs -I{} echo "-I {}" | tr '\n' ' ' > inputs.txt
+      
+      gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
+	  GatherVcfs \$(cat inputs.txt) \
+	  -O gatk.vcf.gz
 
-  script:
-
-    """
-    gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
-        MergeVcfs \
-        -I $vcflist \
-        -D $dict \
-        -O gatk.vcf.gz
-    """
+      # Create tabix index explicitly, as gatherVcf does not produce one
+      tabix -p vcf gatk.vcf.gz
+      """
 }
 
-
-
+// Previously using picard's mergeVCF
+// process gatk_mergevcfs {
+//
+//  publishDir "$params.outdir/gatk", mode: 'copy'
+//
+//  input:
+//    path(vcflist)
+//    path(dict)
+//
+//  output:
+//    path("gatk.vcf.gz"), emit: vcfz
+//    path("gatk.vcf.gz.tbi"), emit: vcfi
+//
+//  script:
+//
+//    """
+//   gatk --java-options "-Xmx{task.memory.giga}g -Xms{task.memory.giga}g" \
+//        MergeVcfs \
+//        -I $vcflist \
+//        -D $dict \
+//        -O gatk.vcf.gz
+//    """
+// }
