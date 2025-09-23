@@ -281,8 +281,12 @@ process gatk_gathervcfs {
 
     script:
       """
-      # Construct GatherVcfs inputs string
-      sort ${vcflist} | xargs -I{} echo "-I {}" | tr '\\n' ' ' > inputs.txt
+      # Construct GatherVcfs inputs string with ordered scattered vcfs
+      # sort ${vcflist} | xargs -I{} echo "-I {}" | tr '\\n' ' ' > inputs.txt
+      awk -F/ '{print $NF "\t" $0}' ${vcflist} \
+               | sort -k1,1V \
+               | cut -f2 \
+               | xargs -I{} echo "-I {}" | tr '\n' ' ' > inputs.txt
 
       gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
 	GatherVcfs \$(cat inputs.txt) \
