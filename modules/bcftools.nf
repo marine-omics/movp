@@ -66,7 +66,7 @@ process fasta_generate_chrs {
 
 }
 
-process bcftools_concat {
+process gatk_gathervcfs {
 
     publishDir "$params.outdir/gatk", mode: 'copy'
 
