@@ -175,10 +175,10 @@ process gatk_mark_duplicates {
 
   def outfile = "${bam.baseName}_marked.bam"
 
-  def mem = task.memory.giga*0.8
+  def mem = round(task.memory.giga*0.8)
 
   """
-    gatk --java-options "-Xmx${round(mem)}G" MarkDuplicates \
+    gatk --java-options "-Xmx${mem}G" MarkDuplicates \
       -I $bam -O $outfile \
       $args \
       -METRICS_FILE ${bam.baseName}_duplicatemetrics.txt
