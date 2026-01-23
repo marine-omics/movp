@@ -178,7 +178,7 @@ process gatk_mark_duplicates {
   def mem = (task.memory as MemoryUnit) * 0.8 
 
   """
-    gatk --java-options "-Xmx${mem.giga}G" MarkDuplicates \
+    gatk --java-options "-Xmx${mem.giga}G" -XX:ConcGCThreads=1 MarkDuplicates \
       -I $bam -O $outfile \
       $args \
       -METRICS_FILE ${bam.baseName}_duplicatemetrics.txt
