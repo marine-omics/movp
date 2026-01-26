@@ -185,7 +185,10 @@ process gatk_mark_duplicates {
   """
 }
 
-
+// As long as the interval size is kept small this process cost is governed by CPU not memory
+// It is very difficult to precisely control the number of CPUs used. 
+// Suggest requesting 4 when usually at most 2 will be used, with 2 in reserve for GC
+//
 process gatk_haplotype_caller {
 
     input:
@@ -201,13 +204,12 @@ process gatk_haplotype_caller {
     script:
     def args = task.ext.args ?: ''
     def outfile = "${bam.baseName}.${interval.baseName}.g.vcf.gz"
-    def threads = task.cpus*2
 
     """
 
-    gatk --java-options "-Xmx${task.memory.giga}G" \
+    gatk --java-options "-Xmx${task.memory.giga}G -XX:ConcGCThreads=1" \
         HaplotypeCaller \
-        --native-pair-hmm-threads ${threads} \
+        --native-pair-hmm-threads ${task.cpus} \
         -R $genome \
         -I $bam \
         -L $interval \
