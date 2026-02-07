@@ -1,3 +1,4 @@
+// Ensures that the UMI is encoded in the bamfile with tag RX as required by MarkDuplicates
 process extract_umis {
 
     input:

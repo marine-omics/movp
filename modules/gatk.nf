@@ -185,6 +185,40 @@ process gatk_mark_duplicates {
   """
 }
 
+
+process gatk_mark_duplicates_withumis {
+
+  publishDir "$params.outdir/mapped_marked_bams", mode: 'copy'  
+
+  input:
+    tuple val(sample), path(bam)
+
+  output:
+    tuple val(sample), path("*.bam"), emit: mbam
+    tuple val(sample), path("*_duplicatemetrics.txt"), emit: dupmetrics
+    tuple val(sample), path("*_umi_metrics.txt"), emit: umimetrics
+
+  script:
+
+  def args = task.ext.args ?: ''
+
+  def outfile = "${bam.baseName}_marked.bam"
+
+  def mem = (task.memory as MemoryUnit) * 0.5 
+
+  """
+    gatk --java-options "-Xmx${mem.giga}G -XX:ConcGCThreads=${task.cpus-2}" UmiAwareMarkDuplicatesWithMateCigar \
+      -I $bam -O $outfile \
+      $args \
+      -METRICS_FILE ${bam.baseName}_duplicatemetrics.txt \
+      -UMI_METRICS ${bam.baseName}_umi_metrics.txt
+  """
+}
+
+
+
+
+
 // As long as the interval size is kept small this process cost is governed by CPU not memory
 // It is very difficult to precisely control the number of CPUs used. 
 // Suggest requesting 4 when usually at most 2 will be used, with 2 in reserve for GC

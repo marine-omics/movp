@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 include { fastqc } from './modules/fastqc.nf'
 include { multiqc_fastqc; multiqc_fastp; multiqc_bams } from './modules/multiqc.nf'
 include { fastp } from './modules/fastp.nf'
-include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk4_createintervallist; gatk_scatterintervals; gatk_mark_duplicates; gatk_haplotype_caller; gatk_genomicsdb_import; gatk_genotypegvcfs; gatk_mergevcfs } from './modules/gatk.nf'
+include { fastq2ubam; markadapters; bwa_mem_gatk; gatk4_createsequencedict; gatk4_createintervallist; gatk_scatterintervals; gatk_mark_duplicates; gatk_mark_duplicates_withumis; gatk_haplotype_caller; gatk_genomicsdb_import; gatk_genotypegvcfs; gatk_mergevcfs } from './modules/gatk.nf'
 include { extract_umis } from './modules/fgbio.nf'
 include { bwa_index } from './modules/bwa.nf'
 include { sidx; faidx; flagstat; stat; idxstat; samtools_merge } from './modules/samtools.nf'
@@ -72,8 +72,11 @@ workflow gatk_map {
 
     ch_persample_bams = ch_merged_multi_bams.mix(ch_rename_single_bams)
 
-    mapped_marked_bams = gatk_mark_duplicates(ch_persample_bams)
-
+    if ( params.idt ){
+      mapped_marked_bams = gatk_mark_duplicates(ch_persample_bams)
+    }
+      mapped_marked_bams = gatk_mark_duplicates_withumis(ch_persample_bams)
+    }
   emit:
     mapped_marked_bams.mbam
 }
