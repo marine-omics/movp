@@ -65,11 +65,9 @@ process fastq2ubam {
 
       def read_group  = "${meta.sample}.${meta.flowcell}.${meta.lane}"
 
-      def mem = (task.memory as MemoryUnit) - 2 // 2G less than requested 
-
       if (meta.single_end) {
         """
-        gatk --java-options "-Xmx${mem}G" FastqToSam \\
+        gatk --java-options "-Xmx${task.memory.giga-2}G" FastqToSam \\
         -FASTQ ${reads[0]} \\
           -OUTPUT ${read_group}.bam \\
           -READ_GROUP_NAME ${read_group} \\
@@ -80,7 +78,7 @@ process fastq2ubam {
         """
         } else {
         """
-        gatk --java-options "-Xmx${mem}G" FastqToSam \\
+        gatk --java-options "-Xmx${task.memory.giga-2}G" FastqToSam \\
         -FASTQ ${reads[0]} \\
         -FASTQ2 ${reads[1]} \\
           -OUTPUT ${read_group}.bam \\
