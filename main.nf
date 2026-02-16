@@ -74,7 +74,7 @@ workflow gatk_map {
 
     if ( params.idt ){
       mapped_marked_bams = gatk_mark_duplicates(ch_persample_bams)
-    }
+    } else {
       mapped_marked_bams = gatk_mark_duplicates_withumis(ch_persample_bams)
     }
   emit:
