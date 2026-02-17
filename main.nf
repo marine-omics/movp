@@ -73,9 +73,9 @@ workflow gatk_map {
     ch_persample_bams = ch_merged_multi_bams.mix(ch_rename_single_bams)
 
     if ( params.idt ){
-      mapped_marked_bams = gatk_mark_duplicates(ch_persample_bams)
-    } else {
       mapped_marked_bams = gatk_mark_duplicates_withumis(ch_persample_bams)
+    } else {
+      mapped_marked_bams = gatk_mark_duplicates(ch_persample_bams)
     }
   emit:
     mapped_marked_bams.mbam
