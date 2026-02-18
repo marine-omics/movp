@@ -16,6 +16,9 @@ params.idt = false
 params.nocall = false
 params.samples = null
 params.bams = null
+// Default java_heap_fraction for genotypeGVCF
+// If not value is provided in custom config files, 0.8 is used
+params.java_heap_fraction = params.java_heap_fraction ?: 0.8
 
 
 println("IDT: ${params.idt}")
