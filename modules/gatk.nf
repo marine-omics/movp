@@ -177,9 +177,11 @@ process gatk_mark_duplicates {
   def outfile = "${bam.baseName}_marked.bam"
 
   def mem = (task.memory as MemoryUnit) * 0.5 
+  def gcthreads = Math.min(6,task.cpus-2)
+
 
   """
-    gatk --java-options "-Xmx${mem.giga}G -XX:ConcGCThreads=${task.cpus-2}" MarkDuplicates \
+    gatk --java-options "-Xmx${mem.giga}G -XX:ConcGCThreads=${gcthreads}" MarkDuplicates \
       -I $bam -O $outfile \
       $args \
       -METRICS_FILE ${bam.baseName}_duplicatemetrics.txt
@@ -206,9 +208,10 @@ process gatk_mark_duplicates_withumis {
   def outfile = "${bam.baseName}_marked.bam"
 
   def mem = (task.memory as MemoryUnit) * 0.5 
+  def gcthreads = Math.min(6,task.cpus-2)
 
   """
-    gatk --java-options "-Xmx${mem.giga}G -XX:ConcGCThreads=${task.cpus-2}" UmiAwareMarkDuplicatesWithMateCigar \
+    gatk --java-options "-Xmx${mem.giga}G -XX:ConcGCThreads=${gcthreads}" UmiAwareMarkDuplicatesWithMateCigar \
       -I $bam -O $outfile \
       $args \
       -METRICS_FILE ${bam.baseName}_duplicatemetrics.txt \
