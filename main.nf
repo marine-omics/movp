@@ -237,14 +237,21 @@ def flowcellLaneFromFastq(path) {
         return [flowcell:fields[0],lane:fields[1]]
     } else if (line.startsWith('SRR')) {
       // SRA format.  Flowcell is lost.  Just use the SRA id
+      //@SRR3165592.1 1 length=101
       def srfields = line.split('\\s')
       return [flowcell:srfields[0],lane:1]
+    } else if ( line =~ /^[A-Z][0-9]{9}/ ) {
+      // BGI Format
+      // @S100003228L1C001R0020000003/2
 
-    } else {
+      matcher = line =~ /^([A-Z][0-9]{9})(L[0-9])/
+
+      return [flowcell:matcher[0][1],lane:matcher[0][2]]
+   } else {
       // Not standard Illumina format
 
-      //@SRR3165592.1 1 length=101
 
+      println line
       // This print command is too spammy. TODO: Find a way to print just once at startup.
 //      println "Sequence identifier does not conform to Illumina standard. Flowcell and lane will be set to dummy values"
       return [flowcell:"None",lane:1]
