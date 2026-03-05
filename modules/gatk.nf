@@ -299,8 +299,12 @@ process gatk_genotypegvcfs {
     script:
     def args = task.ext.args ?: ''
 
-    """
-    gatk --java-options "-Xmx${task.memory.giga}g -Xms${task.memory.giga}g" \
+    def mem = (task.memory as MemoryUnit) * 0.5 
+    def gcthreads = Math.min(6,task.cpus-2)
+
+
+  """
+    gatk --java-options "-Xmx${mem.giga}G -Xms${mem.giga}G -XX:ConcGCThreads=${gcthreads}" \
         GenotypeGVCFs \
         -R $genome \
         -O ${regionid}.vcf.gz \
