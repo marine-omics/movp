@@ -218,11 +218,17 @@ def flowcellLaneFromFastq(path) {
     // or
     // FLOWCELLID:LANE:xx:... (five fields)
     def line
-    path.withInputStream {
-        InputStream gzipStream = new java.util.zip.GZIPInputStream(it)
-        Reader decoder = new InputStreamReader(gzipStream, 'ASCII')
-        BufferedReader buffered = new BufferedReader(decoder)
-        line = buffered.readLine()
+    try {
+        path.withInputStream {
+            InputStream gzipStream = new java.util.zip.GZIPInputStream(it)
+            Reader decoder = new InputStreamReader(gzipStream, 'ASCII')
+            BufferedReader buffered = new BufferedReader(decoder)
+            line = buffered.readLine()
+        }
+    } catch (java.util.zip.ZipException e) {
+        exit 1, "ERROR: File is not a valid gzip file: ${path}\n${e.message}"
+    } catch (Exception e) {
+        exit 1, "ERROR: Could not open file: ${path}\n${e.message}"
     }
     assert line.startsWith('@')
     line = line.substring(1)
