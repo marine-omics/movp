@@ -265,6 +265,14 @@ def flowcellLaneFromFastq(path) {
     }
 }
 
+def realpath(pathstring) {
+  try {
+    new File(pathstring).toPath().toRealPath().toString()
+  } catch (Exception e) {
+    exit 1, "ERROR: Cannot resolve path (broken symlink or missing file): ${pathstring}\n${e.message}"
+  }
+}
+
 def resolve_path(pathstring){
   if(pathstring =~ /^\//){
     pathstring
@@ -279,8 +287,8 @@ def extract_samples_csv(csv_file) {
       def meta = [:]
       meta.sample = row.sample
 
-      def fastq_1     = file(resolve_path(row.fastq_1), checkIfExists: true)
-      def fastq_2     = row.fastq_2 ? file(resolve_path(row.fastq_2), checkIfExists: true) : null
+      def fastq_1     = file(realpath(resolve_path(row.fastq_1)), checkIfExists: true)
+      def fastq_2     = row.fastq_2 ? file(realpath(resolve_path(row.fastq_2)), checkIfExists: true) : null
       meta.single_end = row.fastq_2 ? false : true
 
       def fclane = flowcellLaneFromFastq(fastq_1)
